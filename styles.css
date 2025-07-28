@@ -659,6 +659,16 @@ button[type="submit"]:hover {
 #notification-ok-btn { background-color: var(--primary-color); color: white; }
 #notification-ok-btn:hover { background-color: var(--primary-hover-color); }
 
+pre[class*="language-"] {
+    background: var(--bg-dark-1) !important;
+    border: 1px solid #444;
+    border-radius: 8px;
+}
+
+:not(pre) > code[class*="language-"], pre[class*="language-"] {
+    background: var(--bg-dark-1) !important;
+}
+
 
 /* --- Penyesuaian Responsif --- */
 @media (max-width: 768px) {

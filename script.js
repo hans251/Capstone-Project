@@ -161,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
             entryDiv.appendChild(entryContent);
             entryList.appendChild(entryDiv);
         });
+
+        // PENAMBAHAN BARU: Panggil Prism.js untuk menyorot semua blok kode
+        Prism.highlightAll();
     }
     
     function renderTagCloud() {
@@ -316,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fungsi untuk menampilkan modal notifikasi
     function showNotification(title, message) {
         notificationTitle.textContent = title;
         notificationText.textContent = message;
@@ -372,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event listener untuk Ekspor/Impor sekarang menggunakan modal
     exportBtn.addEventListener('click', () => {
         const entries = getEntries();
         if (entries.length === 0) {
@@ -437,7 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteCancelBtn.addEventListener('click', closeDeleteConfirmModal);
     deleteConfirmModal.addEventListener('click', (event) => { if (event.target === deleteConfirmModal) closeDeleteConfirmModal(); });
     
-    // Event listener untuk tombol OK di modal notifikasi
     notificationOkBtn.addEventListener('click', () => {
         notificationModal.style.display = 'none';
     });
@@ -453,3 +453,4 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCharCounter();
     backgroundMusic.volume = 0.3;
 });
+// Tambahkan event listener untuk Prism.js
