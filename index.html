@@ -64,42 +64,42 @@
 
     <!-- Konten utama sekarang menjadi elemen utama yang di-scroll -->
     <!-- Footer di dalam main content -->
-          <div class="music-control">
-        <button id="music-toggle-btn" title="Play/Pause Music">
-          <!-- Ikon Play SVG -->
-          <svg
-            id="play-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          <!-- Ikon Pause SVG (disembunyikan) -->
-          <svg
-            id="pause-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            style="display: none"
-          >
-            <rect x="6" y="4" width="4" height="16"></rect>
-            <rect x="14" y="4" width="4" height="16"></rect>
-          </svg>
-        </button>
-      </div>
+    <div class="music-control">
+      <button id="music-toggle-btn" title="Play/Pause Music">
+        <!-- Ikon Play SVG -->
+        <svg
+          id="play-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <!-- Ikon Pause SVG (disembunyikan) -->
+        <svg
+          id="pause-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="display: none"
+        >
+          <rect x="6" y="4" width="4" height="16"></rect>
+          <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+      </button>
+    </div>
 
     <footer class="site-footer">
       <div>
@@ -133,7 +133,11 @@
           id="journal-input"
           placeholder="Write your new entry here..."
         ></textarea>
-        <input type="text" id="tag-input" placeholder="Tambahkan tag (contoh: #relativitas #kuantum)">
+        <input
+          type="text"
+          id="tag-input"
+          placeholder="Tambahkan tag (contoh: #relativitas #kuantum)"
+        />
         <div class="textarea-footer">
           <span id="char-counter">0</span>
         </div>
@@ -146,6 +150,11 @@
         <span id="entry-counter"></span>
       </div>
       <div id="entry-list"></div>
+
+      <div class="data-actions-container">
+        <button id="export-btn">Ekspor Jurnal</button>
+        <button id="import-btn">Impor Jurnal</button>
+      </div>  
     </main>
 
     <!-- Modal (tetap di luar main) -->
@@ -174,11 +183,23 @@
       </div>
     </div>
 
-       <audio id="background-music" loop>
-        <!-- GANTI NAMA FILE INI DENGAN NAMA FILE MUSIK ANDA -->
-        <source src="sound/stasis-finval.mp3" type="audio/mpeg">
-        Browser Anda tidak mendukung elemen audio.
+        <div id="notification-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="notification-title">Notification</h2>
+            <p id="notification-text">This is a notification message.</p>
+            <div class="modal-actions">
+                <button id="notification-ok-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="background-music" loop>
+      <!-- GANTI NAMA FILE INI DENGAN NAMA FILE MUSIK ANDA -->
+      <source src="sound/stasis-finval.mp3" type="audio/mpeg" />
+      Browser Anda tidak mendukung elemen audio.
     </audio>
+
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="script.js"></script>

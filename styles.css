@@ -632,6 +632,33 @@ button[type="submit"]:hover {
     color: var(--primary-hover-color);
 }
 
+.data-actions-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-actions-container button {
+    background-color: #444;
+    color: var(--text-light);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.data-actions-container button:hover {
+    background-color: #555;
+}
+
+#notification-ok-btn { background-color: var(--primary-color); color: white; }
+#notification-ok-btn:hover { background-color: var(--primary-hover-color); }
+
 
 /* --- Penyesuaian Responsif --- */
 @media (max-width: 768px) {

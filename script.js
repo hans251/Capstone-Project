@@ -2,14 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Seleksi Elemen DOM
     const journalForm = document.getElementById('journal-form');
     const journalInput = document.getElementById('journal-input');
-    const tagInput = document.getElementById('tag-input'); // Input untuk tag
+    const tagInput = document.getElementById('tag-input');
     const entryList = document.getElementById('entry-list');
     const searchInput = document.getElementById('search-input');
     const sortSelect = document.getElementById('sort-select');
     const deleteAllBtn = document.getElementById('delete-all-btn');
     const charCounter = document.getElementById('char-counter');
     const entryCounter = document.getElementById('entry-counter');
-    const tagCloudContainer = document.getElementById('tag-cloud-container'); // Container untuk "Awan Tag"
+    const tagCloudContainer = document.getElementById('tag-cloud-container');
     
     // Seleksi elemen musik
     const backgroundMusic = document.getElementById('background-music');
@@ -30,10 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
     const deleteCancelBtn = document.getElementById('delete-cancel-btn');
     
+    // Seleksi elemen untuk Ekspor/Impor
+    const exportBtn = document.getElementById('export-btn');
+    const importBtn = document.getElementById('import-btn');
+    const importFileInput = document.getElementById('import-file-input');
+
+    // Seleksi elemen untuk Modal Notifikasi
+    const notificationModal = document.getElementById('notification-modal');
+    const notificationTitle = document.getElementById('notification-title');
+    const notificationText = document.getElementById('notification-text');
+    const notificationOkBtn = document.getElementById('notification-ok-btn');
+
     let currentEditingId = null;
     let currentDeletingId = null;
     let isDeletingAll = false;
-    let activeTag = null; // Menyimpan tag yang sedang aktif
+    let activeTag = null;
 
     // --- FUNGSI PENGELOLAAN DATA ---
     function getEntries() {
@@ -85,24 +96,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const entryText = document.createElement('div');
             entryText.className = 'entry-text';
-            
-            // PERBAIKAN KUNCI: Logika baru untuk menangani tautan dengan aman
-            // 1. Parse Markdown menjadi HTML mentah
             const rawHtml = marked.parse(entry.text);
-            // 2. Buat elemen sementara untuk memanipulasi HTML ini
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = rawHtml;
-            // 3. Cari semua tag <a> di dalamnya
             const links = tempDiv.querySelectorAll('a');
-            // 4. Tambahkan atribut yang benar ke setiap tautan
             links.forEach(link => {
                 link.target = '_blank';
                 link.rel = 'noopener noreferrer';
             });
-            // 5. Gunakan HTML yang sudah dimodifikasi
             entryText.innerHTML = tempDiv.innerHTML;
             
-            // Menampilkan tag di dalam entri
             const entryTagsContainer = document.createElement('div');
             entryTagsContainer.className = 'entry-tags';
             if (entry.tags && entry.tags.length > 0) {
@@ -138,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             entryContent.appendChild(timestamp);
             entryContent.appendChild(entryText);
-            entryContent.appendChild(entryTagsContainer); // Menambahkan container tag
+            entryContent.appendChild(entryTagsContainer);
 
             const TRUNCATE_LENGTH = 300;
             if (entry.text.length > TRUNCATE_LENGTH) {
@@ -160,15 +163,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Fungsi untuk merender "Awan Tag"
     function renderTagCloud() {
         const allEntries = getEntries();
         const allTags = allEntries.flatMap(entry => entry.tags || []);
         const uniqueTags = [...new Set(allTags)];
+        tagCloudContainer.innerHTML = '';
 
-        tagCloudContainer.innerHTML = ''; // Kosongkan container
-
-        // Tombol untuk menampilkan semua entri
         const allButton = document.createElement('button');
         allButton.textContent = 'Semua Entri';
         allButton.className = 'tag-btn';
@@ -181,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         tagCloudContainer.appendChild(allButton);
 
-        // Tombol untuk setiap tag unik
         uniqueTags.forEach(tag => {
             const tagButton = document.createElement('button');
             tagButton.textContent = tag;
@@ -197,28 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- FUNGSI UTAMA UNTUK MEMPERBARUI TAMPILAN ---
     function updateDisplay(newEntryId = null) {
         let allEntries = getEntries();
         const searchTerm = searchInput.value.toLowerCase();
         const sortValue = sortSelect.value;
-        
-        // 1. Filter berdasarkan tag aktif
         if (activeTag) {
             allEntries = allEntries.filter(entry => entry.tags && entry.tags.includes(activeTag));
         }
-
-        // 2. Filter berdasarkan pencarian
         const filteredEntries = allEntries.filter(entry => entry.text.toLowerCase().includes(searchTerm));
-
-        // 3. Urutkan hasil
         if (sortValue === 'newest') {
             filteredEntries.sort((a, b) => b.id - a.id);
         } else if (sortValue === 'oldest') {
             filteredEntries.sort((a, b) => a.id - b.id);
         }
-
-        // 4. Render hasil akhir dan perbarui awan tag
         renderEntries(filteredEntries, newEntryId);
         renderTagCloud();
     }
@@ -326,11 +316,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Fungsi untuk menampilkan modal notifikasi
+    function showNotification(title, message) {
+        notificationTitle.textContent = title;
+        notificationText.textContent = message;
+        notificationModal.style.display = 'flex';
+    }
+
     // --- EVENT LISTENERS ---
     journalForm.addEventListener('submit', function(event) {
         event.preventDefault();
         const text = journalInput.value.trim();
-        // Mengambil dan memproses tag
         const tags = tagInput.value.trim().split(/[\s,]+/).filter(tag => tag.startsWith('#') && tag.length > 1);
 
         if (text) {
@@ -338,13 +334,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: Date.now(),
                 text: text,
                 timestamp: new Date().toISOString(),
-                tags: tags // Menyimpan tag ke dalam objek entri
+                tags: tags
             };
             const currentEntries = getEntries();
             currentEntries.push(newEntry);
             saveEntries(currentEntries);
             journalInput.value = '';
-            tagInput.value = ''; // Mengosongkan input tag
+            tagInput.value = '';
             updateCharCounter();
             updateDisplay(newEntry.id);
         }
@@ -376,12 +372,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event listener untuk Ekspor/Impor sekarang menggunakan modal
+    exportBtn.addEventListener('click', () => {
+        const entries = getEntries();
+        if (entries.length === 0) {
+            showNotification('Ekspor Gagal', 'Tidak ada data untuk diekspor.');
+            return;
+        }
+        const dataStr = JSON.stringify(entries, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'physics-journal-backup.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', () => {
+        importFileInput.click();
+    });
+
+    importFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedEntries = JSON.parse(e.target.result);
+                if (Array.isArray(importedEntries)) {
+                    isDeletingAll = true;
+                    deleteModalTitle.textContent = 'Konfirmasi Impor';
+                    deleteModalText.textContent = 'Ini akan menimpa semua entri yang ada. Lanjutkan?';
+                    deleteConfirmModal.style.display = 'flex';
+                    
+                    const importConfirmHandler = () => {
+                        saveEntries(importedEntries);
+                        updateDisplay();
+                        closeDeleteConfirmModal();
+                        deleteConfirmBtn.removeEventListener('click', importConfirmHandler);
+                        deleteConfirmBtn.addEventListener('click', confirmDelete);
+                    };
+                    
+                    deleteConfirmBtn.removeEventListener('click', confirmDelete);
+                    deleteConfirmBtn.addEventListener('click', importConfirmHandler);
+
+                } else {
+                    showNotification('Impor Gagal', 'Format file tidak valid.');
+                }
+            } catch (error) {
+                showNotification('Impor Gagal', 'Gagal membaca file. Pastikan file dalam format JSON yang benar.');
+            }
+        };
+        reader.readAsText(file);
+        importFileInput.value = '';
+    });
+
+
     modalSaveBtn.addEventListener('click', saveEdit);
     modalCancelBtn.addEventListener('click', closeEditModal);
     editModal.addEventListener('click', (event) => { if (event.target === editModal) closeEditModal(); });
     deleteConfirmBtn.addEventListener('click', confirmDelete);
     deleteCancelBtn.addEventListener('click', closeDeleteConfirmModal);
     deleteConfirmModal.addEventListener('click', (event) => { if (event.target === deleteConfirmModal) closeDeleteConfirmModal(); });
+    
+    // Event listener untuk tombol OK di modal notifikasi
+    notificationOkBtn.addEventListener('click', () => {
+        notificationModal.style.display = 'none';
+    });
+    notificationModal.addEventListener('click', (event) => {
+        if (event.target === notificationModal) {
+            notificationModal.style.display = 'none';
+        }
+    });
 
     // --- PEMUATAN AWAL ---
     loadSettings();
