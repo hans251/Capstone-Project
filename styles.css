@@ -163,7 +163,7 @@ body {
   left: 50px;
   font-size: 7em;
   font-weight: bold;
-  font-family: "Share Tech Mono", monospace;
+  font-family: "Roboto", monospace;
   color: rgba(255, 255, 255, 0.15);
   transform-origin: bottom left;
   transform: rotate(-45deg);

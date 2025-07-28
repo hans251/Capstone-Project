@@ -115,19 +115,7 @@
 
     <main>
       <h1>My Physics Learning Journal</h1>
-      <!-- PENAMBAHAN BARU: Container untuk kontrol (search & sort) -->
-      <div class="controls-container">
-        <input
-          type="search"
-          id="search-input"
-          placeholder="Search entries..."
-        />
-        <select id="sort-select">
-          <option value="newest">Sort: Newest</option>
-          <option value="oldest">Sort: Oldest</option>
-        </select>
-        <button id="delete-all-btn">Delete All</button>
-      </div>
+      
 
       <form id="journal-form">
         <textarea
@@ -144,6 +132,20 @@
         </div>
         <button type="submit">Save Entry</button>
       </form>
+
+      <!-- PENAMBAHAN BARU: Container untuk kontrol (search & sort) -->
+      <div class="controls-container">
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Search entries..."
+        />
+        <select id="sort-select">
+          <option value="newest">Sort: Newest</option>
+          <option value="oldest">Sort: Oldest</option>
+        </select>
+        <button id="delete-all-btn">Delete All</button>
+      </div>
 
       <div id="tag-cloud-container" class="tag-cloud-container"></div>
       <div class="list-header">
