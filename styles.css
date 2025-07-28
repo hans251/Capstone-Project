@@ -279,6 +279,16 @@ textarea {
   margin-bottom: 15px;
 }
 
+#tag-input { width: 100%; padding: 12px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: var(--text-light); font-size: 14px; margin-bottom: 5px; box-sizing: border-box; }
+
+#char-counter { font-size: 0.9em; color: var(--text-muted); }
+/* PENAMBAHAN BARU: Styling untuk "Awan Tag" */
+.tag-cloud-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #444; }
+.tag-btn { background-color: #444; color: var(--text-light); border: none; padding: 6px 12px; border-radius: 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.3s; }
+.tag-btn:hover { background-color: #555; }
+.tag-btn.active { background-color: var(--primary-color); color: #000; font-weight: bold; }
+
+
 #char-counter {
   font-size: 0.9em;
   color: var(--text-muted);

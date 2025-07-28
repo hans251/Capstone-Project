@@ -1,17 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // PERBAIKAN: Konfigurasi kustom untuk marked.js dihapus karena menyebabkan bug.
-    // Kita akan menangani tautan dengan cara yang lebih aman setelahnya.
-
-
     // Seleksi Elemen DOM
     const journalForm = document.getElementById('journal-form');
     const journalInput = document.getElementById('journal-input');
+    const tagInput = document.getElementById('tag-input'); // Input untuk tag
     const entryList = document.getElementById('entry-list');
     const searchInput = document.getElementById('search-input');
     const sortSelect = document.getElementById('sort-select');
     const deleteAllBtn = document.getElementById('delete-all-btn');
     const charCounter = document.getElementById('char-counter');
     const entryCounter = document.getElementById('entry-counter');
+    const tagCloudContainer = document.getElementById('tag-cloud-container'); // Container untuk "Awan Tag"
     
     // Seleksi elemen musik
     const backgroundMusic = document.getElementById('background-music');
@@ -35,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEditingId = null;
     let currentDeletingId = null;
     let isDeletingAll = false;
+    let activeTag = null; // Menyimpan tag yang sedang aktif
 
     // --- FUNGSI PENGELOLAAN DATA ---
     function getEntries() {
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const entryText = document.createElement('div');
             entryText.className = 'entry-text';
-
+            
             // PERBAIKAN KUNCI: Logika baru untuk menangani tautan dengan aman
             // 1. Parse Markdown menjadi HTML mentah
             const rawHtml = marked.parse(entry.text);
@@ -103,6 +102,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // 5. Gunakan HTML yang sudah dimodifikasi
             entryText.innerHTML = tempDiv.innerHTML;
             
+            // Menampilkan tag di dalam entri
+            const entryTagsContainer = document.createElement('div');
+            entryTagsContainer.className = 'entry-tags';
+            if (entry.tags && entry.tags.length > 0) {
+                entry.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'entry-tag';
+                    tagSpan.textContent = tag;
+                    entryTagsContainer.appendChild(tagSpan);
+                });
+            }
+
             const entryActions = document.createElement('div');
             entryActions.className = 'entry-actions';
 
@@ -127,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             entryContent.appendChild(timestamp);
             entryContent.appendChild(entryText);
+            entryContent.appendChild(entryTagsContainer); // Menambahkan container tag
 
             const TRUNCATE_LENGTH = 300;
             if (entry.text.length > TRUNCATE_LENGTH) {
@@ -148,19 +160,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Fungsi untuk merender "Awan Tag"
+    function renderTagCloud() {
+        const allEntries = getEntries();
+        const allTags = allEntries.flatMap(entry => entry.tags || []);
+        const uniqueTags = [...new Set(allTags)];
+
+        tagCloudContainer.innerHTML = ''; // Kosongkan container
+
+        // Tombol untuk menampilkan semua entri
+        const allButton = document.createElement('button');
+        allButton.textContent = 'Semua Entri';
+        allButton.className = 'tag-btn';
+        if (activeTag === null) {
+            allButton.classList.add('active');
+        }
+        allButton.addEventListener('click', () => {
+            activeTag = null;
+            updateDisplay();
+        });
+        tagCloudContainer.appendChild(allButton);
+
+        // Tombol untuk setiap tag unik
+        uniqueTags.forEach(tag => {
+            const tagButton = document.createElement('button');
+            tagButton.textContent = tag;
+            tagButton.className = 'tag-btn';
+            if (tag === activeTag) {
+                tagButton.classList.add('active');
+            }
+            tagButton.addEventListener('click', () => {
+                activeTag = tag;
+                updateDisplay();
+            });
+            tagCloudContainer.appendChild(tagButton);
+        });
+    }
+
     // --- FUNGSI UTAMA UNTUK MEMPERBARUI TAMPILAN ---
     function updateDisplay(newEntryId = null) {
-        const allEntries = getEntries();
+        let allEntries = getEntries();
         const searchTerm = searchInput.value.toLowerCase();
         const sortValue = sortSelect.value;
+        
+        // 1. Filter berdasarkan tag aktif
+        if (activeTag) {
+            allEntries = allEntries.filter(entry => entry.tags && entry.tags.includes(activeTag));
+        }
+
+        // 2. Filter berdasarkan pencarian
         const filteredEntries = allEntries.filter(entry => entry.text.toLowerCase().includes(searchTerm));
 
+        // 3. Urutkan hasil
         if (sortValue === 'newest') {
             filteredEntries.sort((a, b) => b.id - a.id);
         } else if (sortValue === 'oldest') {
             filteredEntries.sort((a, b) => a.id - b.id);
         }
+
+        // 4. Render hasil akhir dan perbarui awan tag
         renderEntries(filteredEntries, newEntryId);
+        renderTagCloud();
     }
 
     // --- FUNGSI MODAL & CRUD ---
@@ -270,16 +330,21 @@ document.addEventListener('DOMContentLoaded', () => {
     journalForm.addEventListener('submit', function(event) {
         event.preventDefault();
         const text = journalInput.value.trim();
+        // Mengambil dan memproses tag
+        const tags = tagInput.value.trim().split(/[\s,]+/).filter(tag => tag.startsWith('#') && tag.length > 1);
+
         if (text) {
             const newEntry = {
                 id: Date.now(),
                 text: text,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                tags: tags // Menyimpan tag ke dalam objek entri
             };
             const currentEntries = getEntries();
             currentEntries.push(newEntry);
             saveEntries(currentEntries);
             journalInput.value = '';
+            tagInput.value = ''; // Mengosongkan input tag
             updateCharCounter();
             updateDisplay(newEntry.id);
         }
