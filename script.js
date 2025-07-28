@@ -41,6 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationText = document.getElementById('notification-text');
     const notificationOkBtn = document.getElementById('notification-ok-btn');
 
+    // Seleksi container toast
+    const toastContainer = document.getElementById('toast-container');
+
     let currentEditingId = null;
     let currentDeletingId = null;
     let isDeletingAll = false;
@@ -123,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const copyButton = document.createElement('button');
             copyButton.textContent = 'Salin';
             copyButton.className = 'copy-btn';
-            copyButton.addEventListener('click', () => copyEntryToClipboard(entry.text, copyButton));
+            copyButton.addEventListener('click', () => copyEntryToClipboard(entry.text));
 
             const editButton = document.createElement('button');
             editButton.textContent = 'Edit';
@@ -162,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
             entryList.appendChild(entryDiv);
         });
 
-        // PENAMBAHAN BARU: Panggil Prism.js untuk menyorot semua blok kode
         Prism.highlightAll();
     }
     
@@ -295,21 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
         charCounter.textContent = `${currentLength} / ${maxLength}`;
     }
 
-    function copyEntryToClipboard(text, buttonElement) {
+    function copyEntryToClipboard(text) {
         const tempTextarea = document.createElement('textarea');
         tempTextarea.value = text;
         document.body.appendChild(tempTextarea);
         tempTextarea.select();
         document.execCommand('copy');
         document.body.removeChild(tempTextarea);
-
-        buttonElement.textContent = 'Tersalin!';
-        buttonElement.classList.add('copied');
-
-        setTimeout(() => {
-            buttonElement.textContent = 'Salin';
-            buttonElement.classList.remove('copied');
-        }, 1500);
+        showToast('Teks berhasil disalin!');
     }
 
     function loadSettings() {
@@ -323,6 +318,23 @@ document.addEventListener('DOMContentLoaded', () => {
         notificationTitle.textContent = title;
         notificationText.textContent = message;
         notificationModal.style.display = 'flex';
+    }
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 3000);
     }
 
     // --- EVENT LISTENERS ---
@@ -355,6 +367,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     journalInput.addEventListener('input', updateCharCounter);
+    journalInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && event.ctrlKey) {
+            event.preventDefault();
+            journalForm.querySelector('button[type="submit"]').click();
+        }
+    });
+
     searchInput.addEventListener('input', updateDisplay);
     
     sortSelect.addEventListener('change', () => {
@@ -453,4 +472,3 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCharCounter();
     backgroundMusic.volume = 0.3;
 });
-// Tambahkan event listener untuk Prism.js

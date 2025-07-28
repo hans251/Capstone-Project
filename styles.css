@@ -669,6 +669,38 @@ pre[class*="language-"] {
     background: var(--bg-dark-1) !important;
 }
 
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000; /* Paling atas */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.toast {
+    background-color: var(--bg-dark-3);
+    color: var(--text-light);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--success-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.hide {
+    opacity: 0;
+    transform: translateX(100%);
+}
 
 /* --- Penyesuaian Responsif --- */
 @media (max-width: 768px) {
