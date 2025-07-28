@@ -10,7 +10,14 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Share+Tech+Mono&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -115,9 +122,9 @@
 
     <main>
       <h1>My Physics Learning Journal</h1>
-      
 
       <form id="journal-form">
+        <input type="text" id="title-input" placeholder="Entry Title...">
         <textarea
           id="journal-input"
           placeholder="Write your new entry here..."
@@ -125,7 +132,7 @@
         <input
           type="text"
           id="tag-input"
-          placeholder="Tambahkan tag (contoh: #relativitas #kuantum)"
+          placeholder="Add Tag (E.g: #relativity #quantum)"
         />
         <div class="textarea-footer">
           <span id="char-counter">0</span>
@@ -155,15 +162,16 @@
       <div id="entry-list"></div>
 
       <div class="data-actions-container">
-        <button id="export-btn">Ekspor Jurnal</button>
-        <button id="import-btn">Impor Jurnal</button>
-      </div>  
+        <button id="export-btn">Export Journal</button>
+        <button id="import-btn">Import Journal</button>
+      </div>
     </main>
 
     <!-- Modal (tetap di luar main) -->
     <div id="edit-modal" class="modal-overlay">
       <div class="modal-content">
         <h2>Edit Entry</h2>
+        <input type="text" id="modal-title-input" placeholder="Judul...">
         <textarea id="modal-textarea"></textarea>
         <div class="modal-actions">
           <button id="modal-save-btn">Save Changes</button>
@@ -186,17 +194,17 @@
       </div>
     </div>
 
-        <div id="notification-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="notification-title">Notification</h2>
-            <p id="notification-text">This is a notification message.</p>
-            <div class="modal-actions">
-                <button id="notification-ok-btn">OK</button>
-            </div>
+    <div id="notification-modal" class="modal-overlay">
+      <div class="modal-content">
+        <h2 id="notification-title">Notification</h2>
+        <p id="notification-text">This is a notification message.</p>
+        <div class="modal-actions">
+          <button id="notification-ok-btn">OK</button>
         </div>
+      </div>
     </div>
 
-        <div id="toast-container"></div>
+    <div id="toast-container"></div>
 
     <audio id="background-music" loop>
       <!-- GANTI NAMA FILE INI DENGAN NAMA FILE MUSIK ANDA -->
@@ -204,11 +212,18 @@
       Browser Anda tidak mendukung elemen audio.
     </audio>
 
-    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+    <input
+      type="file"
+      id="import-file-input"
+      accept=".json"
+      style="display: none"
+    />
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

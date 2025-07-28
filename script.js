@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Seleksi Elemen DOM
     const journalForm = document.getElementById('journal-form');
+    const titleInput = document.getElementById('title-input'); // PENAMBAHAN BARU
     const journalInput = document.getElementById('journal-input');
     const tagInput = document.getElementById('tag-input');
     const entryList = document.getElementById('entry-list');
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Seleksi elemen untuk Modal Edit
     const editModal = document.getElementById('edit-modal');
+    const modalTitleInput = document.getElementById('modal-title-input'); // PENAMBAHAN BARU
     const modalTextarea = document.getElementById('modal-textarea');
     const modalSaveBtn = document.getElementById('modal-save-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
@@ -93,6 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const entryContent = document.createElement('div');
             entryContent.className = 'entry-content';
+            
+            // PENAMBAHAN BARU: Membuat elemen judul
+            const entryTitle = document.createElement('h3');
+            entryTitle.className = 'entry-title';
+            entryTitle.textContent = entry.title;
+
             const timestamp = document.createElement('small');
             timestamp.className = 'entry-timestamp';
             timestamp.textContent = new Date(entry.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
@@ -142,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             entryActions.appendChild(editButton);
             entryActions.appendChild(deleteButton);
             
+            entryContent.appendChild(entryTitle); // Menambahkan judul
             entryContent.appendChild(timestamp);
             entryContent.appendChild(entryText);
             entryContent.appendChild(entryTagsContainer);
@@ -166,6 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         Prism.highlightAll();
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });
     }
     
     function renderTagCloud() {
@@ -175,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tagCloudContainer.innerHTML = '';
 
         const allButton = document.createElement('button');
-        allButton.textContent = 'Semua Entri';
+        allButton.textContent = 'All Entries';
         allButton.className = 'tag-btn';
         if (activeTag === null) {
             allButton.classList.add('active');
@@ -208,7 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeTag) {
             allEntries = allEntries.filter(entry => entry.tags && entry.tags.includes(activeTag));
         }
-        const filteredEntries = allEntries.filter(entry => entry.text.toLowerCase().includes(searchTerm));
+        // MODIFIKASI: Pencarian sekarang mencakup judul dan teks
+        const filteredEntries = allEntries.filter(entry => 
+            entry.text.toLowerCase().includes(searchTerm) || 
+            (entry.title && entry.title.toLowerCase().includes(searchTerm))
+        );
         if (sortValue === 'newest') {
             filteredEntries.sort((a, b) => b.id - a.id);
         } else if (sortValue === 'oldest') {
@@ -224,6 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const entryToEdit = entries.find(e => e.id === id);
         if (!entryToEdit) return;
         currentEditingId = id;
+        // MODIFIKASI: Mengisi input judul di modal
+        modalTitleInput.value = entryToEdit.title || '';
         modalTextarea.value = entryToEdit.text;
         editModal.style.display = 'flex';
     }
@@ -237,8 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentEditingId === null) return;
         const entries = getEntries();
         const entryToEdit = entries.find(e => e.id === currentEditingId);
+        // MODIFIKASI: Mengambil nilai baru dari input judul dan teks
+        const newTitle = modalTitleInput.value.trim();
         const newText = modalTextarea.value.trim();
-        if (entryToEdit && newText) {
+        if (entryToEdit && newTitle && newText) {
+            entryToEdit.title = newTitle;
             entryToEdit.text = newText;
             saveEntries(entries);
             updateDisplay();
@@ -294,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCharCounter() {
         const currentLength = journalInput.value.length;
         const maxLength = journalInput.maxLength;
-        charCounter.textContent = `${currentLength} / ${maxLength}`;
+        charCounter.textContent = `${currentLength}`;
     }
 
     function copyEntryToClipboard(text) {
@@ -340,12 +364,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- EVENT LISTENERS ---
     journalForm.addEventListener('submit', function(event) {
         event.preventDefault();
+        // MODIFIKASI: Mengambil nilai dari input judul
+        const title = titleInput.value.trim();
         const text = journalInput.value.trim();
         const tags = tagInput.value.trim().split(/[\s,]+/).filter(tag => tag.startsWith('#') && tag.length > 1);
 
-        if (text) {
+        if (title && text) { // Memastikan judul dan teks tidak kosong
             const newEntry = {
                 id: Date.now(),
+                title: title, // Menyimpan judul
                 text: text,
                 timestamp: new Date().toISOString(),
                 tags: tags
@@ -353,11 +380,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentEntries = getEntries();
             currentEntries.push(newEntry);
             saveEntries(currentEntries);
+            titleInput.value = ''; // Mengosongkan input judul
             journalInput.value = '';
             tagInput.value = '';
             updateCharCounter();
             updateDisplay(newEntry.id);
         }
+    });
+
+    // MODIFIKASI: Shortcut sekarang juga berlaku untuk input judul dan tag
+    [titleInput, journalInput, tagInput].forEach(input => {
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                event.preventDefault();
+                journalForm.querySelector('button[type="submit"]').click();
+            }
+        });
     });
 
     deleteAllBtn.addEventListener('click', () => {
@@ -367,13 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     journalInput.addEventListener('input', updateCharCounter);
-    journalInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && event.ctrlKey) {
-            event.preventDefault();
-            journalForm.querySelector('button[type="submit"]').click();
-        }
-    });
-
     searchInput.addEventListener('input', updateDisplay);
     
     sortSelect.addEventListener('change', () => {
