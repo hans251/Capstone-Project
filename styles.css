@@ -1,0 +1,636 @@
+:root {
+  --primary-color: #d4af37;
+  --primary-hover-color: #e6c75e;
+  --danger-color: #dc3545;
+  --danger-hover-color: #c82333;
+  --bg-dark-1: #0d1117;
+  --bg-dark-2: #1e1e1e;
+  --bg-dark-3: #2a2a2a;
+  --text-light: #f0f0f0;
+  --text-muted: #ababab;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #000;
+  color: var(--text-light);
+  margin: 0 auto;
+
+  /* PERUBAHAN KUNCI: Body tidak lagi mengatur posisi, hanya sebagai container */
+}
+
+/* --- PERUBAHAN ARSITEKTUR TOTAL: Latar Belakang Terpisah --- */
+
+.background-container {
+  position: fixed; /* Latar belakang menempel di layar dan tidak bergerak */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Mencegah elemen di dalamnya menyebabkan scroll */
+  z-index: 0; /* Paling belakang */
+  perspective: 1000px;
+}
+
+@keyframes spin-disk {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+@keyframes move-stars {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -10000px 5000px;
+  }
+}
+
+.starfield-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+      1px 1px at 20px 30px,
+      #eee,
+      rgba(0, 0, 0, 0)
+    ),
+    radial-gradient(1px 1px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 130px 80px, #fff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0, 0, 0, 0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: move-stars 200s linear infinite;
+}
+
+.blackhole-system {
+  position: absolute;
+  top: 0%;
+  left: 25%;
+  width: 50vmax;
+  height: 50vmax;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) rotateX(75deg);
+  animation: spin-disk 30s linear infinite;
+}
+
+.blackhole-system::before,
+.blackhole-system::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+    circle,
+    transparent 35%,
+    #ffeeaa 36%,
+    #ffd700 40%,
+    rgba(255, 215, 0, 0.1) 50%,
+    transparent 60%
+  );
+  border-radius: 50%;
+}
+
+.blackhole-system::after {
+  transform: rotateY(90deg);
+}
+
+.blackhole-system {
+  background: radial-gradient(circle, #000 15%, transparent 20%);
+}
+
+/* --- Elemen Dekoratif --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotate(15deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(15deg);
+  }
+}
+
+@keyframes slideInFromBottomLeft {
+  from {
+    opacity: 0;
+    transform: translate(-100%, 100%) rotate(45deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-25%, -60%) rotate(35deg);
+  }
+}
+
+.top-right-decoration,
+.bottom-left-decoration {
+  position: fixed; /* Dekorasi tetap menempel di sudut layar */
+  z-index: 2; /* Di atas konten */
+  opacity: 0;
+  pointer-events: none; /* Agar tidak bisa di-klik */
+}
+
+.top-right-decoration {
+  top: -150px;
+  right: -150px;
+  color: rgba(255, 255, 255, 0.15);
+  transform: rotate(15deg);
+  animation: fadeInUp 1.5s ease-out 0.5s forwards;
+}
+
+.bottom-left-decoration {
+  bottom: 50px;
+  left: 50px;
+  font-size: 7em;
+  font-weight: bold;
+  font-family: "Share Tech Mono", monospace;
+  color: rgba(255, 255, 255, 0.15);
+  transform-origin: bottom left;
+  transform: rotate(-45deg);
+  animation: slideInFromBottomLeft 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.5s
+    forwards;
+}
+
+.orbit-1,
+.orbit-2,
+.orbit-3 {
+  animation-duration: 10s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  transform-origin: center;
+}
+.orbit-1 {
+  animation-name: rotateOrbit;
+}
+.orbit-2 {
+  animation-name: rotateOrbit;
+  animation-direction: reverse;
+  animation-duration: 15s;
+}
+.orbit-3 {
+  animation-name: rotateOrbit;
+  animation-duration: 12s;
+}
+@keyframes rotateOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Konten Utama --- */
+main {
+  width: 100%;
+  max-width: 1024px; /* Batasi lebar maksimum untuk konten */
+  /* PERUBAHAN KUNCI: Margin disesuaikan untuk pemusatan dan scrolling */
+  margin: 5vh auto;
+  padding: 20px;
+  margin-top: 100px;
+  position: relative;
+  z-index: 1; /* Di atas background, di bawah dekorasi pojok */
+  background: rgba(13, 17, 23, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.controls-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  flex-grow: 1; /* Membuat search bar mengisi ruang */
+}
+
+#sort-select {
+  background-color: #333;
+  color: var(--text-light);
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+}
+
+/* Sisa kode CSS lainnya tetap sama... */
+h1 {
+  text-align: center;
+  color: #ffffff;
+}
+.search-container {
+  margin-bottom: 20px;
+}
+#search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #333;
+  color: var(--text-light);
+  font-size: 16px;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+textarea {
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 120px;
+  background-color: #333;
+  color: var(--text-light);
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+}
+
+.textarea-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+#char-counter {
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+button[type="submit"] {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 16px;
+  font-weight: bold;
+}
+button[type="submit"]:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #444;
+}
+
+.list-header h2 {
+  margin: 0;
+  font-size: 1.2em;
+  color: var(--text-light);
+}
+
+#entry-counter {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  background-color: var(--bg-dark-3);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+#entry-list {
+  list-style: none;
+  padding: 0;
+}
+.entry {
+  background-color: var(--bg-dark-3);
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid var(--primary-color);
+  display: flex;
+  flex-direction: column;
+}
+.entry-text {
+  flex-grow: 1;
+  margin: 0 0 15px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.6;
+}
+
+.entry-number {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: var(--text-muted);
+  min-width: 45px; /* Disesuaikan agar rata */
+  text-align: left;
+  line-height: 1; /* Agar posisi vertikalnya pas */
+}
+
+.entry-timestamp {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+  align-self: flex-start;
+}
+.entry-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.entry button {
+  background-color: #444;
+  color: var(--text-light);
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+.entry .edit-btn:hover {
+  background-color: var(--primary-color);
+}
+
+.entry .copy-btn:hover { background-color: var(--primary-color); }
+.entry .copy-btn.copied { background-color: var(--success-color); }
+
+.entry-text.truncated {
+  max-height: 100px; /* Batas tinggi teks */
+  overflow: hidden;
+  position: relative;
+}
+
+.entry-text.truncated::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, var(--bg-dark-3));
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
+}
+
+.entry.new-entry {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.entry.removing {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.read-more-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: bold;
+  padding: 5px 0;
+  margin-top: 5px;
+  align-self: flex-start;
+}
+
+.read-more-btn:hover {
+  text-decoration: underline;
+}
+
+#delete-all-btn {
+  width: 15%;
+  background-color: transparent;
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
+  padding: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+}
+
+#delete-all-btn:hover {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background-color: var(--bg-dark-2);
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+.modal-content p {
+  margin-top: 0;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.modal-content h2 {
+  margin-top: 0;
+}
+#modal-textarea {
+  width: 100%;
+  min-height: 150px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  resize: vertical;
+  background-color: #333;
+  color: var(--text-light);
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-actions button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+#modal-save-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+#modal-save-btn:hover {
+  background-color: var(--primary-hover-color);
+}
+#modal-cancel-btn,
+#delete-cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+#modal-cancel-btn:hover,
+#delete-cancel-btn:hover {
+  background-color: #5a6268;
+}
+#delete-confirm-btn {
+  background-color: var(--danger-color);
+  color: white;
+}
+#delete-confirm-btn:hover {
+  background-color: var(--danger-hover-color);
+}
+
+/* Styling untuk Footer */
+.site-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.site-footer p {
+  margin: 0 0 10px 0;
+}
+
+.footer-links a {
+  color: var(--text-light);
+  text-decoration: none;
+  margin: 0 10px;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.entry-text p {
+  margin: 0 0 10px 0;
+}
+.entry-text ul,
+.entry-text ol {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+.entry-text li {
+  margin-bottom: 5px;
+}
+.entry-text strong {
+  color: var(--primary-color);
+}
+.entry-text em {
+  font-style: italic;
+}
+.entry-text code {
+  background-color: #161b22;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "Share Tech Mono", monospace;
+}
+.entry-text pre {
+  background-color: #161b22;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+/* --- Penyesuaian Responsif --- */
+@media (max-width: 768px) {
+  main {
+    margin: 15px;
+    padding: 15px;
+  }
+  h1 {
+    font-size: 1.8em;
+  }
+  .bottom-left-decoration {
+    font-size: 3em;
+    left: 15px;
+    bottom: 15px;
+  }
+  .top-right-decoration {
+    top: -100px;
+    right: -100px;
+    transform: rotate(15deg) scale(0.8);
+  }
+}
+
+@media (max-width: 480px) {
+  .blackhole-system {
+    top: 20%;
+    left: 0%;
+  }
+  main {
+    margin: 10px;
+    margin-top: 8rem;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  h1 {
+    font-size: 1.5em;
+  }
+  textarea,
+  #search-input {
+    font-size: 14px;
+    min-height: 100px;
+  }
+  button {
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+  .entry button {
+    padding: 6px 10px;
+  }
+  .top-right-decoration,
+  .bottom-left-decoration {
+    display: none;
+  }
+}
