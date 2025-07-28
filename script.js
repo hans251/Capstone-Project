@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // PERBAIKAN: Konfigurasi kustom untuk marked.js dihapus karena menyebabkan bug.
+    // Kita akan menangani tautan dengan cara yang lebih aman setelahnya.
+
+
     // Seleksi Elemen DOM
     const journalForm = document.getElementById('journal-form');
     const journalInput = document.getElementById('journal-input');
@@ -82,7 +86,22 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const entryText = document.createElement('div');
             entryText.className = 'entry-text';
-            entryText.innerHTML = marked.parse(entry.text);
+
+            // PERBAIKAN KUNCI: Logika baru untuk menangani tautan dengan aman
+            // 1. Parse Markdown menjadi HTML mentah
+            const rawHtml = marked.parse(entry.text);
+            // 2. Buat elemen sementara untuk memanipulasi HTML ini
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = rawHtml;
+            // 3. Cari semua tag <a> di dalamnya
+            const links = tempDiv.querySelectorAll('a');
+            // 4. Tambahkan atribut yang benar ke setiap tautan
+            links.forEach(link => {
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+            });
+            // 5. Gunakan HTML yang sudah dimodifikasi
+            entryText.innerHTML = tempDiv.innerHTML;
             
             const entryActions = document.createElement('div');
             entryActions.className = 'entry-actions';
@@ -191,34 +210,30 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteConfirmModal.style.display = 'none';
     }
 
-    // PERBAIKAN KUNCI: Logika diubah agar tidak me-reset state terlalu cepat
     function confirmDelete() {
-        closeDeleteConfirmModal(); // Langsung tutup modal secara visual
-
         if (isDeletingAll) {
             const allEntryElements = document.querySelectorAll('.entry');
             allEntryElements.forEach(el => el.classList.add('removing'));
-
             setTimeout(() => {
-                saveEntries([]); // Hapus data
-                updateDisplay(); // Perbarui tampilan
-                isDeletingAll = false; // Reset state setelah selesai
-            }, 300); // Tunggu animasi selesai
+                saveEntries([]);
+                updateDisplay();
+                isDeletingAll = false;
+            }, 300);
         } else if (currentDeletingId !== null) {
             const entryElement = document.querySelector(`.entry[data-id="${currentDeletingId}"]`);
             if (entryElement) {
                 entryElement.classList.add('removing');
-                const idToDelete = currentDeletingId; // Simpan ID sebelum di-reset
-
+                const idToDelete = currentDeletingId;
                 setTimeout(() => {
                     let entries = getEntries();
                     entries = entries.filter(e => e.id !== idToDelete);
-                    saveEntries(entries); // Hapus data
-                    updateDisplay(); // Perbarui tampilan
-                    currentDeletingId = null; // Reset state setelah selesai
-                }, 300); // Tunggu animasi selesai
+                    saveEntries(entries);
+                    currentDeletingId = null;
+                    updateDisplay();
+                }, 300);
             }
         }
+        closeDeleteConfirmModal();
     }
 
     function updateCharCounter() {

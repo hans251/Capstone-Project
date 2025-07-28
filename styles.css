@@ -611,6 +611,18 @@ button[type="submit"]:hover {
   overflow-x: auto;
 }
 
+.entry-text a {
+    color: var(--primary-color);
+    text-decoration: underline;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.entry-text a:hover {
+    color: var(--primary-hover-color);
+}
+
+
 /* --- Penyesuaian Responsif --- */
 @media (max-width: 768px) {
   main {
