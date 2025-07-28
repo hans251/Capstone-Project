@@ -552,6 +552,35 @@ button[type="submit"]:hover {
   text-decoration: underline;
 }
 
+.music-control {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2;
+}
+
+#music-toggle-btn {
+    background-color: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    /* MODIFIKASI: Mengubah ukuran menjadi persegi panjang */
+    width: 64px;
+    height: 40px;
+    /* MODIFIKASI: Mengubah border-radius untuk sudut membulat */
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+#music-toggle-btn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
 .entry-text p {
   margin: 0 0 10px 0;
 }

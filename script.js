@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const charCounter = document.getElementById('char-counter');
     const entryCounter = document.getElementById('entry-counter');
     
+    // Seleksi elemen musik
+    const backgroundMusic = document.getElementById('background-music');
+    const musicToggleBtn = document.getElementById('music-toggle-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+
     // Seleksi elemen untuk Modal Edit
     const editModal = document.getElementById('edit-modal');
     const modalTextarea = document.getElementById('modal-textarea');
@@ -182,35 +188,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeDeleteConfirmModal() {
-        currentDeletingId = null;
-        isDeletingAll = false;
         deleteConfirmModal.style.display = 'none';
     }
 
+    // PERBAIKAN KUNCI: Logika diubah agar tidak me-reset state terlalu cepat
     function confirmDelete() {
+        closeDeleteConfirmModal(); // Langsung tutup modal secara visual
+
         if (isDeletingAll) {
             const allEntryElements = document.querySelectorAll('.entry');
             allEntryElements.forEach(el => el.classList.add('removing'));
+
             setTimeout(() => {
-                saveEntries([]);
-                updateDisplay();
-                isDeletingAll = false;
-            }, 300);
+                saveEntries([]); // Hapus data
+                updateDisplay(); // Perbarui tampilan
+                isDeletingAll = false; // Reset state setelah selesai
+            }, 300); // Tunggu animasi selesai
         } else if (currentDeletingId !== null) {
             const entryElement = document.querySelector(`.entry[data-id="${currentDeletingId}"]`);
             if (entryElement) {
                 entryElement.classList.add('removing');
+                const idToDelete = currentDeletingId; // Simpan ID sebelum di-reset
+
                 setTimeout(() => {
                     let entries = getEntries();
-                    const idToDelete = currentDeletingId;
                     entries = entries.filter(e => e.id !== idToDelete);
-                    saveEntries(entries);
-                    currentDeletingId = null;
-                    updateDisplay();
-                }, 300);
+                    saveEntries(entries); // Hapus data
+                    updateDisplay(); // Perbarui tampilan
+                    currentDeletingId = null; // Reset state setelah selesai
+                }, 300); // Tunggu animasi selesai
             }
         }
-        closeDeleteConfirmModal();
     }
 
     function updateCharCounter() {
@@ -236,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1500);
     }
 
-    // PENAMBAHAN BARU: Fungsi untuk memuat pengaturan
     function loadSettings() {
         const savedSortPreference = localStorage.getItem('journalSortPreference');
         if (savedSortPreference) {
@@ -272,12 +279,23 @@ document.addEventListener('DOMContentLoaded', () => {
     journalInput.addEventListener('input', updateCharCounter);
     searchInput.addEventListener('input', updateDisplay);
     
-    // MODIFIKASI: Event listener untuk sort sekarang juga menyimpan pengaturan
     sortSelect.addEventListener('change', () => {
         localStorage.setItem('journalSortPreference', sortSelect.value);
         updateDisplay();
     });
     
+    musicToggleBtn.addEventListener('click', () => {
+        if (backgroundMusic.paused) {
+            backgroundMusic.play();
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'inline-block';
+        } else {
+            backgroundMusic.pause();
+            playIcon.style.display = 'inline-block';
+            pauseIcon.style.display = 'none';
+        }
+    });
+
     modalSaveBtn.addEventListener('click', saveEdit);
     modalCancelBtn.addEventListener('click', closeEditModal);
     editModal.addEventListener('click', (event) => { if (event.target === editModal) closeEditModal(); });
@@ -286,7 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteConfirmModal.addEventListener('click', (event) => { if (event.target === deleteConfirmModal) closeDeleteConfirmModal(); });
 
     // --- PEMUATAN AWAL ---
-    loadSettings(); // Panggil fungsi ini untuk memuat pengaturan
+    loadSettings();
     updateDisplay();
     updateCharCounter();
+    backgroundMusic.volume = 0.3;
 });

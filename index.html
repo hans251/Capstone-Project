@@ -64,12 +64,51 @@
 
     <!-- Konten utama sekarang menjadi elemen utama yang di-scroll -->
     <!-- Footer di dalam main content -->
+          <div class="music-control">
+        <button id="music-toggle-btn" title="Play/Pause Music">
+          <!-- Ikon Play SVG -->
+          <svg
+            id="play-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <!-- Ikon Pause SVG (disembunyikan) -->
+          <svg
+            id="pause-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="display: none"
+          >
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        </button>
+      </div>
+
     <footer class="site-footer">
-      <p>Created with 🪐 by Hafiz Ansyari</p>
-      <div class="footer-links">
-        <a href="#" target="_blank">GitHub</a>
-        <a href="#" target="_blank">LinkedIn</a>
-        <a href="#" target="_blank">Instagram</a>
+      <div>
+        <p>Created with 🪐 by Hafiz Ansyari</p>
+        <div class="footer-links">
+          <a href="#" target="_blank">GitHub</a>
+          <a href="#" target="_blank">LinkedIn</a>
+          <a href="#" target="_blank">Instagram</a>
+        </div>
       </div>
     </footer>
 
@@ -131,6 +170,13 @@
         </div>
       </div>
     </div>
+
+       <audio id="background-music" loop>
+        <!-- GANTI NAMA FILE INI DENGAN NAMA FILE MUSIK ANDA -->
+        <source src="sound/stasis-finval.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="script.js"></script>
   </body>
