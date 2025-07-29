@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Seleksi Elemen DOM
     const journalForm = document.getElementById('journal-form');
-    const titleInput = document.getElementById('title-input'); // PENAMBAHAN BARU
+    const titleInput = document.getElementById('title-input');
     const journalInput = document.getElementById('journal-input');
     const tagInput = document.getElementById('tag-input');
     const entryList = document.getElementById('entry-list');
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Seleksi elemen untuk Modal Edit
     const editModal = document.getElementById('edit-modal');
-    const modalTitleInput = document.getElementById('modal-title-input'); // PENAMBAHAN BARU
+    const modalTitleInput = document.getElementById('modal-title-input');
     const modalTextarea = document.getElementById('modal-textarea');
     const modalSaveBtn = document.getElementById('modal-save-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Seleksi container toast
     const toastContainer = document.getElementById('toast-container');
+
+    // Seleksi elemen untuk grafik
+    const chartContainer = document.getElementById('chart-container');
+    const tagChartCanvas = document.getElementById('tag-chart');
+    let myTagChart = null; // Variabel untuk menyimpan instance grafik
 
     let currentEditingId = null;
     let currentDeletingId = null;
@@ -74,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sortValue = sortSelect.value;
         const totalEntries = entries.length;
+        const searchTerm = searchInput.value.toLowerCase(); // Ambil kata kunci pencarian
 
         entries.forEach((entry, index) => {
             const entryDiv = document.createElement('div');
@@ -96,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const entryContent = document.createElement('div');
             entryContent.className = 'entry-content';
             
-            // PENAMBAHAN BARU: Membuat elemen judul
             const entryTitle = document.createElement('h3');
             entryTitle.className = 'entry-title';
             entryTitle.textContent = entry.title;
@@ -117,6 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             entryText.innerHTML = tempDiv.innerHTML;
             
+            // Logika untuk menyorot hasil pencarian
+            if (searchTerm) {
+                const regex = new RegExp(searchTerm, 'gi'); // 'g' untuk global, 'i' untuk case-insensitive
+                entryText.innerHTML = entryText.innerHTML.replace(regex, (match) => `<mark>${match}</mark>`);
+                entryTitle.innerHTML = entryTitle.innerHTML.replace(regex, (match) => `<mark>${match}</mark>`);
+            }
+
             const entryTagsContainer = document.createElement('div');
             entryTagsContainer.className = 'entry-tags';
             if (entry.tags && entry.tags.length > 0) {
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             entryActions.appendChild(editButton);
             entryActions.appendChild(deleteButton);
             
-            entryContent.appendChild(entryTitle); // Menambahkan judul
+            entryContent.appendChild(entryTitle);
             entryContent.appendChild(timestamp);
             entryContent.appendChild(entryText);
             entryContent.appendChild(entryTagsContainer);
@@ -190,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tagCloudContainer.innerHTML = '';
 
         const allButton = document.createElement('button');
-        allButton.textContent = 'All Entries';
+        allButton.textContent = 'Semua Entri';
         allButton.className = 'tag-btn';
         if (activeTag === null) {
             allButton.classList.add('active');
@@ -216,6 +228,66 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderTagChart() {
+        const allEntries = getEntries();
+        const allTags = allEntries.flatMap(entry => entry.tags || []);
+        
+        if (allTags.length === 0) {
+            chartContainer.style.display = 'none';
+            return;
+        }
+        
+        chartContainer.style.display = 'block';
+
+        const tagCounts = allTags.reduce((acc, tag) => {
+            acc[tag] = (acc[tag] || 0) + 1;
+            return acc;
+        }, {});
+
+        const labels = Object.keys(tagCounts);
+        const data = Object.values(tagCounts);
+
+        if (myTagChart) {
+            myTagChart.destroy();
+        }
+
+        myTagChart = new Chart(tagChartCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Jumlah Entri',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(212, 175, 55, 0.8)',
+                        'rgba(100, 149, 237, 0.8)',
+                        'rgba(218, 112, 214, 0.8)',
+                        'rgba(255, 105, 97, 0.8)',
+                        'rgba(0, 191, 255, 0.8)',
+                        'rgba(240, 230, 140, 0.8)'
+                    ],
+                    borderColor: '#1e1e1e',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#f0f0f0',
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     function updateDisplay(newEntryId = null) {
         let allEntries = getEntries();
         const searchTerm = searchInput.value.toLowerCase();
@@ -223,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeTag) {
             allEntries = allEntries.filter(entry => entry.tags && entry.tags.includes(activeTag));
         }
-        // MODIFIKASI: Pencarian sekarang mencakup judul dan teks
         const filteredEntries = allEntries.filter(entry => 
             entry.text.toLowerCase().includes(searchTerm) || 
             (entry.title && entry.title.toLowerCase().includes(searchTerm))
@@ -235,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderEntries(filteredEntries, newEntryId);
         renderTagCloud();
+        renderTagChart();
     }
 
     // --- FUNGSI MODAL & CRUD ---
@@ -243,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const entryToEdit = entries.find(e => e.id === id);
         if (!entryToEdit) return;
         currentEditingId = id;
-        // MODIFIKASI: Mengisi input judul di modal
         modalTitleInput.value = entryToEdit.title || '';
         modalTextarea.value = entryToEdit.text;
         editModal.style.display = 'flex';
@@ -258,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentEditingId === null) return;
         const entries = getEntries();
         const entryToEdit = entries.find(e => e.id === currentEditingId);
-        // MODIFIKASI: Mengambil nilai baru dari input judul dan teks
         const newTitle = modalTitleInput.value.trim();
         const newText = modalTextarea.value.trim();
         if (entryToEdit && newTitle && newText) {
@@ -318,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCharCounter() {
         const currentLength = journalInput.value.length;
         const maxLength = journalInput.maxLength;
-        charCounter.textContent = `${currentLength}`;
+        charCounter.textContent = `${currentLength} / ${maxLength}`;
     }
 
     function copyEntryToClipboard(text) {
@@ -361,18 +431,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    function saveDraft() {
+        const draft = {
+            title: titleInput.value,
+            text: journalInput.value,
+            tags: tagInput.value
+        };
+        localStorage.setItem('journalDraft', JSON.stringify(draft));
+    }
+
+    function loadDraft() {
+        const savedDraft = localStorage.getItem('journalDraft');
+        if (savedDraft) {
+            const draft = JSON.parse(savedDraft);
+            titleInput.value = draft.title || '';
+            journalInput.value = draft.text || '';
+            tagInput.value = draft.tags || '';
+            updateCharCounter();
+        }
+    }
+
+    function clearDraft() {
+        localStorage.removeItem('journalDraft');
+    }
+
     // --- EVENT LISTENERS ---
     journalForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        // MODIFIKASI: Mengambil nilai dari input judul
         const title = titleInput.value.trim();
         const text = journalInput.value.trim();
         const tags = tagInput.value.trim().split(/[\s,]+/).filter(tag => tag.startsWith('#') && tag.length > 1);
 
-        if (title && text) { // Memastikan judul dan teks tidak kosong
+        if (title && text) {
             const newEntry = {
                 id: Date.now(),
-                title: title, // Menyimpan judul
+                title: title,
                 text: text,
                 timestamp: new Date().toISOString(),
                 tags: tags
@@ -380,15 +473,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentEntries = getEntries();
             currentEntries.push(newEntry);
             saveEntries(currentEntries);
-            titleInput.value = ''; // Mengosongkan input judul
+            
+            titleInput.value = '';
             journalInput.value = '';
             tagInput.value = '';
+            clearDraft();
             updateCharCounter();
             updateDisplay(newEntry.id);
         }
     });
 
-    // MODIFIKASI: Shortcut sekarang juga berlaku untuk input judul dan tag
     [titleInput, journalInput, tagInput].forEach(input => {
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && event.ctrlKey) {
@@ -396,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 journalForm.querySelector('button[type="submit"]').click();
             }
         });
+        input.addEventListener('input', saveDraft);
     });
 
     deleteAllBtn.addEventListener('click', () => {
@@ -499,6 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PEMUATAN AWAL ---
     loadSettings();
+    loadDraft();
     updateDisplay();
     updateCharCounter();
     backgroundMusic.volume = 0.3;

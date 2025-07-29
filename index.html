@@ -124,7 +124,7 @@
       <h1>My Physics Learning Journal</h1>
 
       <form id="journal-form">
-        <input type="text" id="title-input" placeholder="Entry Title...">
+        <input type="text" id="title-input" placeholder="Entry Title..." />
         <textarea
           id="journal-input"
           placeholder="Write your new entry here..."
@@ -154,7 +154,14 @@
         <button id="delete-all-btn">Delete All</button>
       </div>
 
-      <div id="tag-cloud-container" class="tag-cloud-container"></div>
+      <div class="stats-container">
+        <div id="chart-container">
+          <h3>Distribusi Tag</h3>
+          <canvas id="tag-chart"></canvas>
+        </div>
+        <div id="tag-cloud-container" class="tag-cloud-container"></div>
+      </div>
+
       <div class="list-header">
         <h2>My Entries</h2>
         <span id="entry-counter"></span>
@@ -171,7 +178,7 @@
     <div id="edit-modal" class="modal-overlay">
       <div class="modal-content">
         <h2>Edit Entry</h2>
-        <input type="text" id="modal-title-input" placeholder="Judul...">
+        <input type="text" id="modal-title-input" placeholder="Judul..." />
         <textarea id="modal-textarea"></textarea>
         <div class="modal-actions">
           <button id="modal-save-btn">Save Changes</button>
@@ -224,6 +231,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
