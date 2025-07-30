@@ -14,12 +14,12 @@ Full CRUD Operations: Create, read, update, and delete journal entries.
 Persistent Storage: All data is saved to localStorage, ensuring notes are not lost on page refresh.
 Real-time Search: Instantly filter entries by title or content as you type.
 Dynamic Sorting: Sort entries by newest or oldest. Your preference is saved locally.
-Tagging System: Categorize entries with hashtags (e.g., #relativity, #quantum) for better organization.
+Tagging System: Categorize entries with hashtags (e.g., ```#relativity```, ```#quantum```) for better organization.
 
 Advanced Writing & Data Tools
 Markdown Support: Format your notes with headers, lists, bold, italics, links, and more.
 LaTeX Math Rendering: Write beautiful mathematical equations using KaTeX (e.g., 
-$$E=mc2$$
+$$E=mc^2$$
 ).
 Code Syntax Highlighting: Display code snippets from various languages with full syntax highlighting, powered by Prism.js.
 Data Visualization: An interactive doughnut chart visualizes the distribution of your tags.
