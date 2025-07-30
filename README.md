@@ -8,7 +8,6 @@ Unlike generic note-taking apps, this journal is built from the ground up with f
 
 **Features**
 This project goes beyond the basic CRUD requirements, incorporating a wide range of modern and professional features:
-
 **Core Functionality**
 **Full CRUD Operations:** Create, read, update, and delete journal entries.
 **Persistent Storage:** All data is saved to localStorage, ensuring notes are not lost on page refresh.
