@@ -2,7 +2,7 @@ Physics Learning Journal
 Description
 The Physics Learning Journal is a feature-rich, immersive CRUD (Create, Read, Update, Delete) web application designed for students, educators, and physics enthusiasts. It provides a unique, space-themed environment to write, manage, and organize technical notes.
 
-Unlike generic note-taking apps, this journal is built from the ground up with features specifically tailored for technical and scientific documentation, such as support for Markdown, LaTeX mathematical equations, and code syntax highlighting. All data is saved persistently in the browser's localStorage, making it a fast and reliable client-side application.
+Unlike generic note-taking apps, this journal is built from the ground up with features specifically tailored for technical and scientific documentation, such as support for Markdown, LaTeX mathematical equations, and code syntax highlighting. All data is saved persistently in the browser's ```localStorage```, making it a fast and reliable client-side application.
 
 [Link to Live Demo Here]
 
@@ -50,7 +50,7 @@ Clone the repository:
 ```git clone https://github.com/Andaroth```
 Navigate to the project directory:
 ```cd [project-folder]```
-Open the index.html file in your browser.
+Open the ```index.html``` file in your browser.
 No server or dependencies are needed, as this is a pure client-side application.
 
 AI Support Explanation
