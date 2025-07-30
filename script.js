@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Seleksi elemen untuk grafik
     const chartContainer = document.getElementById('chart-container');
     const tagChartCanvas = document.getElementById('tag-chart');
-    let myTagChart = null; // Variabel untuk menyimpan instance grafik
+    let myTagChart = null;
 
     let currentEditingId = null;
     let currentDeletingId = null;
@@ -66,124 +66,149 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('journalEntries', JSON.stringify(entries));
     }
 
-    // --- FUNGSI RENDER ---
+    // --- REFACTORING: FUNGSI-FUNGSI PEMBANTU UNTUK RENDER ---
+
+    /**
+     * Membuat elemen DOM untuk satu entri jurnal.
+     *param {object} entry - Objek ent  ri jurnal.
+     *param {number} index - Indeks entri dalam array yang ditampilkan.
+     *param {number} totalEntries - Jumlah total entri yang ditampilkan.
+     *param {string} sortValue - Nilai sort yang sedang aktif.
+     *returns {HTMLElement} Elemen div untuk satu entri.
+     */
+    function createEntryElement(entry, index, totalEntries, sortValue) {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'entry';
+        entryDiv.dataset.id = entry.id;
+
+        const entryNumber = document.createElement('div');
+        entryNumber.className = 'entry-number';
+        if (sortValue === 'newest') {
+            entryNumber.textContent = `${totalEntries - index}.`;
+        } else {
+            entryNumber.textContent = `${index + 1}.`;
+        }
+
+        const entryContent = document.createElement('div');
+        entryContent.className = 'entry-content';
+
+        const entryTitle = document.createElement('h3');
+        entryTitle.className = 'entry-title';
+        entryTitle.textContent = entry.title;
+
+        const timestamp = document.createElement('small');
+        timestamp.className = 'entry-timestamp';
+        timestamp.textContent = new Date(entry.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+        const entryText = document.createElement('div');
+        entryText.className = 'entry-text';
+        const rawHtml = marked.parse(entry.text);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = rawHtml;
+        const links = tempDiv.querySelectorAll('a');
+        links.forEach(link => {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+        });
+        entryText.innerHTML = tempDiv.innerHTML;
+
+        const entryTagsContainer = createTagsElement(entry);
+        const entryActions = createActionsElement(entry);
+
+        entryContent.appendChild(entryTitle);
+        entryContent.appendChild(timestamp);
+        entryContent.appendChild(entryText);
+        entryContent.appendChild(entryTagsContainer);
+
+        const TRUNCATE_LENGTH = 300;
+        if (entry.text.length > TRUNCATE_LENGTH) {
+            entryText.classList.add('truncated');
+            const readMoreBtn = document.createElement('button');
+            readMoreBtn.textContent = 'Baca Selengkapnya...';
+            readMoreBtn.className = 'read-more-btn';
+            readMoreBtn.addEventListener('click', () => {
+                entryText.classList.remove('truncated');
+                readMoreBtn.remove();
+            });
+            entryContent.appendChild(readMoreBtn);
+        }
+
+        entryContent.appendChild(entryActions);
+        entryDiv.appendChild(entryNumber);
+        entryDiv.appendChild(entryContent);
+
+        return entryDiv;
+    }
+
+    /**
+     * Membuat elemen DOM untuk menampilkan tag-tag.
+     * @param {object} entry - Objek entri jurnal.
+     * @returns {HTMLElement} Elemen div yang berisi tag.
+     */
+    function createTagsElement(entry) {
+        const container = document.createElement('div');
+        container.className = 'entry-tags';
+        if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'entry-tag';
+                tagSpan.textContent = tag;
+                container.appendChild(tagSpan);
+            });
+        }
+        return container;
+    }
+
+    /**
+     * Membuat elemen DOM untuk tombol-tombol aksi (Salin, Edit, Hapus).
+     * @param {object} entry - Objek entri jurnal.
+     * @returns {HTMLElement} Elemen div yang berisi tombol aksi.
+     */
+    function createActionsElement(entry) {
+        const container = document.createElement('div');
+        container.className = 'entry-actions';
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Salin';
+        copyButton.className = 'copy-btn';
+        copyButton.addEventListener('click', () => copyEntryToClipboard(entry.text));
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.className = 'edit-btn';
+        editButton.addEventListener('click', () => openEditModal(entry.id));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-btn';
+        deleteButton.addEventListener('click', () => openDeleteConfirmModal(entry.id));
+
+        container.appendChild(copyButton);
+        container.appendChild(editButton);
+        container.appendChild(deleteButton);
+        return container;
+    }
+
+
+    // --- FUNGSI RENDER UTAMA (SEKARANG LEBIH RAMPING) ---
     function renderEntries(entriesToRender, newEntryId = null) {
         entryCounter.textContent = `${entriesToRender.length} Entries Found`;
         entryList.innerHTML = '';
-        const entries = entriesToRender;
-
-        if (entries.length === 0) {
+        
+        if (entriesToRender.length === 0) {
             entryList.innerHTML = '<p style="text-align: center; color: #888;">No entries found. Try a different search or add a new entry!</p>';
             return;
         }
 
         const sortValue = sortSelect.value;
-        const totalEntries = entries.length;
-        const searchTerm = searchInput.value.toLowerCase(); // Ambil kata kunci pencarian
+        const totalEntries = entriesToRender.length;
 
-        entries.forEach((entry, index) => {
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'entry';
-            entryDiv.dataset.id = entry.id;
-
+        entriesToRender.forEach((entry, index) => {
+            const entryElement = createEntryElement(entry, index, totalEntries, sortValue);
             if (entry.id === newEntryId) {
-                entryDiv.classList.add('new-entry');
+                entryElement.classList.add('new-entry');
             }
-
-            const entryNumber = document.createElement('div');
-            entryNumber.className = 'entry-number';
-            
-            if (sortValue === 'newest') {
-                entryNumber.textContent = `${totalEntries - index}.`;
-            } else {
-                entryNumber.textContent = `${index + 1}.`;
-            }
-
-            const entryContent = document.createElement('div');
-            entryContent.className = 'entry-content';
-            
-            const entryTitle = document.createElement('h3');
-            entryTitle.className = 'entry-title';
-            entryTitle.textContent = entry.title;
-
-            const timestamp = document.createElement('small');
-            timestamp.className = 'entry-timestamp';
-            timestamp.textContent = new Date(entry.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-            
-            const entryText = document.createElement('div');
-            entryText.className = 'entry-text';
-            const rawHtml = marked.parse(entry.text);
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = rawHtml;
-            const links = tempDiv.querySelectorAll('a');
-            links.forEach(link => {
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-            });
-            entryText.innerHTML = tempDiv.innerHTML;
-            
-            // Logika untuk menyorot hasil pencarian
-            if (searchTerm) {
-                const regex = new RegExp(searchTerm, 'gi'); // 'g' untuk global, 'i' untuk case-insensitive
-                entryText.innerHTML = entryText.innerHTML.replace(regex, (match) => `<mark>${match}</mark>`);
-                entryTitle.innerHTML = entryTitle.innerHTML.replace(regex, (match) => `<mark>${match}</mark>`);
-            }
-
-            const entryTagsContainer = document.createElement('div');
-            entryTagsContainer.className = 'entry-tags';
-            if (entry.tags && entry.tags.length > 0) {
-                entry.tags.forEach(tag => {
-                    const tagSpan = document.createElement('span');
-                    tagSpan.className = 'entry-tag';
-                    tagSpan.textContent = tag;
-                    entryTagsContainer.appendChild(tagSpan);
-                });
-            }
-
-            const entryActions = document.createElement('div');
-            entryActions.className = 'entry-actions';
-
-            const copyButton = document.createElement('button');
-            copyButton.textContent = 'Salin';
-            copyButton.className = 'copy-btn';
-            copyButton.addEventListener('click', () => copyEntryToClipboard(entry.text));
-
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.className = 'edit-btn';
-            editButton.addEventListener('click', () => openEditModal(entry.id));
-            
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.className = 'delete-btn';
-            deleteButton.addEventListener('click', () => openDeleteConfirmModal(entry.id));
-
-            entryActions.appendChild(copyButton);
-            entryActions.appendChild(editButton);
-            entryActions.appendChild(deleteButton);
-            
-            entryContent.appendChild(entryTitle);
-            entryContent.appendChild(timestamp);
-            entryContent.appendChild(entryText);
-            entryContent.appendChild(entryTagsContainer);
-
-            const TRUNCATE_LENGTH = 300;
-            if (entry.text.length > TRUNCATE_LENGTH) {
-                entryText.classList.add('truncated');
-                const readMoreBtn = document.createElement('button');
-                readMoreBtn.textContent = 'Baca Selengkapnya...';
-                readMoreBtn.className = 'read-more-btn';
-                readMoreBtn.addEventListener('click', () => {
-                    entryText.classList.remove('truncated');
-                    readMoreBtn.remove();
-                });
-                entryContent.appendChild(readMoreBtn);
-            }
-            
-            entryContent.appendChild(entryActions);
-            entryDiv.appendChild(entryNumber);
-            entryDiv.appendChild(entryContent);
-            entryList.appendChild(entryDiv);
+            entryList.appendChild(entryElement);
         });
 
         Prism.highlightAll();
