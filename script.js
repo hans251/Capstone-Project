@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tagChartCanvas = document.getElementById('tag-chart');
     let myTagChart = null;
 
+    // Variabel state aplikasi
     let currentEditingId = null;
     let currentDeletingId = null;
     let isDeletingAll = false;
@@ -66,131 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('journalEntries', JSON.stringify(entries));
     }
 
-    // --- REFACTORING: FUNGSI-FUNGSI PEMBANTU UNTUK RENDER ---
-
-    /**
-     * Membuat elemen DOM untuk satu entri jurnal.
-     *param {object} entry - Objek ent  ri jurnal.
-     *param {number} index - Indeks entri dalam array yang ditampilkan.
-     *param {number} totalEntries - Jumlah total entri yang ditampilkan.
-     *param {string} sortValue - Nilai sort yang sedang aktif.
-     *returns {HTMLElement} Elemen div untuk satu entri.
-     */
-    function createEntryElement(entry, index, totalEntries, sortValue) {
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'entry';
-        entryDiv.dataset.id = entry.id;
-
-        const entryNumber = document.createElement('div');
-        entryNumber.className = 'entry-number';
-        if (sortValue === 'newest') {
-            entryNumber.textContent = `${totalEntries - index}.`;
-        } else {
-            entryNumber.textContent = `${index + 1}.`;
-        }
-
-        const entryContent = document.createElement('div');
-        entryContent.className = 'entry-content';
-
-        const entryTitle = document.createElement('h3');
-        entryTitle.className = 'entry-title';
-        entryTitle.textContent = entry.title;
-
-        const timestamp = document.createElement('small');
-        timestamp.className = 'entry-timestamp';
-        timestamp.textContent = new Date(entry.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-
-        const entryText = document.createElement('div');
-        entryText.className = 'entry-text';
-        const rawHtml = marked.parse(entry.text);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = rawHtml;
-        const links = tempDiv.querySelectorAll('a');
-        links.forEach(link => {
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-        });
-        entryText.innerHTML = tempDiv.innerHTML;
-
-        const entryTagsContainer = createTagsElement(entry);
-        const entryActions = createActionsElement(entry);
-
-        entryContent.appendChild(entryTitle);
-        entryContent.appendChild(timestamp);
-        entryContent.appendChild(entryText);
-        entryContent.appendChild(entryTagsContainer);
-
-        const TRUNCATE_LENGTH = 300;
-        if (entry.text.length > TRUNCATE_LENGTH) {
-            entryText.classList.add('truncated');
-            const readMoreBtn = document.createElement('button');
-            readMoreBtn.textContent = 'Baca Selengkapnya...';
-            readMoreBtn.className = 'read-more-btn';
-            readMoreBtn.addEventListener('click', () => {
-                entryText.classList.remove('truncated');
-                readMoreBtn.remove();
-            });
-            entryContent.appendChild(readMoreBtn);
-        }
-
-        entryContent.appendChild(entryActions);
-        entryDiv.appendChild(entryNumber);
-        entryDiv.appendChild(entryContent);
-
-        return entryDiv;
-    }
-
-    /**
-     * Membuat elemen DOM untuk menampilkan tag-tag.
-     * @param {object} entry - Objek entri jurnal.
-     * @returns {HTMLElement} Elemen div yang berisi tag.
-     */
-    function createTagsElement(entry) {
-        const container = document.createElement('div');
-        container.className = 'entry-tags';
-        if (entry.tags && entry.tags.length > 0) {
-            entry.tags.forEach(tag => {
-                const tagSpan = document.createElement('span');
-                tagSpan.className = 'entry-tag';
-                tagSpan.textContent = tag;
-                container.appendChild(tagSpan);
-            });
-        }
-        return container;
-    }
-
-    /**
-     * Membuat elemen DOM untuk tombol-tombol aksi (Salin, Edit, Hapus).
-     * @param {object} entry - Objek entri jurnal.
-     * @returns {HTMLElement} Elemen div yang berisi tombol aksi.
-     */
-    function createActionsElement(entry) {
-        const container = document.createElement('div');
-        container.className = 'entry-actions';
-
-        const copyButton = document.createElement('button');
-        copyButton.textContent = 'Salin';
-        copyButton.className = 'copy-btn';
-        copyButton.addEventListener('click', () => copyEntryToClipboard(entry.text));
-
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.className = 'edit-btn';
-        editButton.addEventListener('click', () => openEditModal(entry.id));
-
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.className = 'delete-btn';
-        deleteButton.addEventListener('click', () => openDeleteConfirmModal(entry.id));
-
-        container.appendChild(copyButton);
-        container.appendChild(editButton);
-        container.appendChild(deleteButton);
-        return container;
-    }
-
-
-    // --- FUNGSI RENDER UTAMA (SEKARANG LEBIH RAMPING) ---
+    // --- FUNGSI RENDER ---
     function renderEntries(entriesToRender, newEntryId = null) {
         entryCounter.textContent = `${entriesToRender.length} Entries Found`;
         entryList.innerHTML = '';
@@ -220,6 +97,109 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // REFACTOR: Fungsi-fungsi pembantu untuk render
+    function createEntryElement(entry, index, totalEntries, sortValue) {
+        const entryContainer = document.createElement('div');
+        entryContainer.className = 'entry';
+        entryContainer.dataset.id = entry.id;
+
+        const numberElement = document.createElement('div');
+        numberElement.className = 'entry-number';
+        if (sortValue === 'newest') {
+            numberElement.textContent = `${totalEntries - index}.`;
+        } else {
+            numberElement.textContent = `${index + 1}.`;
+        }
+
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'entry-content';
+        
+        const titleElement = document.createElement('h3');
+        titleElement.className = 'entry-title';
+        titleElement.textContent = entry.title;
+
+        const timestampElement = document.createElement('small');
+        timestampElement.className = 'entry-timestamp';
+        timestampElement.textContent = new Date(entry.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+        
+        const textElement = document.createElement('div');
+        textElement.className = 'entry-text';
+        const rawHtml = marked.parse(entry.text);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = rawHtml;
+        const links = tempDiv.querySelectorAll('a');
+        links.forEach(link => {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+        });
+        textElement.innerHTML = tempDiv.innerHTML;
+        
+        const tagsContainer = createTagsElement(entry);
+        const actionsContainer = createActionsElement(entry);
+
+        contentWrapper.appendChild(titleElement);
+        contentWrapper.appendChild(timestampElement);
+        contentWrapper.appendChild(textElement);
+        contentWrapper.appendChild(tagsContainer);
+
+        const TRUNCATE_LENGTH = 300;
+        if (entry.text.length > TRUNCATE_LENGTH) {
+            textElement.classList.add('truncated');
+            const readMoreBtn = document.createElement('button');
+            readMoreBtn.textContent = 'Baca Selengkapnya...';
+            readMoreBtn.className = 'read-more-btn';
+            readMoreBtn.addEventListener('click', () => {
+                textElement.classList.remove('truncated');
+                readMoreBtn.remove();
+            });
+            contentWrapper.appendChild(readMoreBtn);
+        }
+        
+        contentWrapper.appendChild(actionsContainer);
+        entryContainer.appendChild(numberElement);
+        entryContainer.appendChild(contentWrapper);
+        return entryContainer;
+    }
+
+    function createTagsElement(entry) {
+        const container = document.createElement('div');
+        container.className = 'entry-tags';
+        if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'entry-tag';
+                tagSpan.textContent = tag;
+                container.appendChild(tagSpan);
+            });
+        }
+        return container;
+    }
+
+    function createActionsElement(entry) {
+        const container = document.createElement('div');
+        container.className = 'entry-actions';
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Salin';
+        copyButton.className = 'copy-btn';
+        copyButton.addEventListener('click', () => copyEntryToClipboard(entry.text));
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.className = 'edit-btn';
+        editButton.addEventListener('click', () => openEditModal(entry.id));
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-btn';
+        deleteButton.addEventListener('click', () => openDeleteConfirmModal(entry.id));
+
+        container.appendChild(copyButton);
+        container.appendChild(editButton);
+        container.appendChild(deleteButton);
+        return container;
+    }
+
     function renderTagCloud() {
         const allEntries = getEntries();
         const allTags = allEntries.flatMap(entry => entry.tags || []);
@@ -234,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         allButton.addEventListener('click', () => {
             activeTag = null;
-            updateDisplay();
+            refreshJournalView();
         });
         tagCloudContainer.appendChild(allButton);
 
@@ -247,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             tagButton.addEventListener('click', () => {
                 activeTag = tag;
-                updateDisplay();
+                refreshJournalView();
             });
             tagCloudContainer.appendChild(tagButton);
         });
@@ -313,10 +293,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateDisplay(newEntryId = null) {
+    // REFACTOR: Nama fungsi diubah menjadi lebih deskriptif
+    /**
+     * Fungsi utama untuk memuat ulang seluruh tampilan jurnal.
+     * Mengambil data, memfilter, mengurutkan, lalu memanggil semua fungsi render.
+     * @param {number|null} newEntryId - ID entri baru untuk dianimasikan.
+     */
+    function refreshJournalView(newEntryId = null) {
+        // 1. Ambil semua data
         let allEntries = getEntries();
         const searchTerm = searchInput.value.toLowerCase();
         const sortValue = sortSelect.value;
+        
+        // 2. Filter data berdasarkan tag dan pencarian
         if (activeTag) {
             allEntries = allEntries.filter(entry => entry.tags && entry.tags.includes(activeTag));
         }
@@ -324,11 +313,15 @@ document.addEventListener('DOMContentLoaded', () => {
             entry.text.toLowerCase().includes(searchTerm) || 
             (entry.title && entry.title.toLowerCase().includes(searchTerm))
         );
+
+        // 3. Urutkan data
         if (sortValue === 'newest') {
             filteredEntries.sort((a, b) => b.id - a.id);
         } else if (sortValue === 'oldest') {
             filteredEntries.sort((a, b) => a.id - b.id);
         }
+
+        // 4. Panggil semua fungsi render dengan data yang sudah diproses
         renderEntries(filteredEntries, newEntryId);
         renderTagCloud();
         renderTagChart();
@@ -360,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
             entryToEdit.title = newTitle;
             entryToEdit.text = newText;
             saveEntries(entries);
-            updateDisplay();
+            refreshJournalView();
         }
         closeEditModal();
     }
@@ -390,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allEntryElements.forEach(el => el.classList.add('removing'));
             setTimeout(() => {
                 saveEntries([]);
-                updateDisplay();
+                refreshJournalView();
                 isDeletingAll = false;
             }, 300);
         } else if (currentDeletingId !== null) {
@@ -403,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     entries = entries.filter(e => e.id !== idToDelete);
                     saveEntries(entries);
                     currentDeletingId = null;
-                    updateDisplay();
+                    refreshJournalView();
                 }, 300);
             }
         }
@@ -412,8 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCharCounter() {
         const currentLength = journalInput.value.length;
-        const maxLength = journalInput.maxLength;
-        charCounter.textContent = `${currentLength} / ${maxLength}`;
+        charCounter.textContent = `${currentLength}`;
     }
 
     function copyEntryToClipboard(text) {
@@ -504,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tagInput.value = '';
             clearDraft();
             updateCharCounter();
-            updateDisplay(newEntry.id);
+            refreshJournalView(newEntry.id);
         }
     });
 
@@ -525,11 +517,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     journalInput.addEventListener('input', updateCharCounter);
-    searchInput.addEventListener('input', updateDisplay);
+    searchInput.addEventListener('input', refreshJournalView);
     
     sortSelect.addEventListener('change', () => {
         localStorage.setItem('journalSortPreference', sortSelect.value);
-        updateDisplay();
+        refreshJournalView();
     });
     
     musicToggleBtn.addEventListener('click', () => {
@@ -572,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (e) => {
             try {
                 const importedEntries = JSON.parse(e.target.result);
-                if (Array.isArray(importedEntries)) {
+                if (isValidJournalData(importedEntries)) {
                     isDeletingAll = true;
                     deleteModalTitle.textContent = 'Konfirmasi Impor';
                     deleteModalText.textContent = 'Ini akan menimpa semua entri yang ada. Lanjutkan?';
@@ -580,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const importConfirmHandler = () => {
                         saveEntries(importedEntries);
-                        updateDisplay();
+                        refreshJournalView();
                         closeDeleteConfirmModal();
                         deleteConfirmBtn.removeEventListener('click', importConfirmHandler);
                         deleteConfirmBtn.addEventListener('click', confirmDelete);
@@ -590,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     deleteConfirmBtn.addEventListener('click', importConfirmHandler);
 
                 } else {
-                    showNotification('Impor Gagal', 'Format file tidak valid.');
+                    showNotification('Impor Gagal', 'File JSON tidak memiliki struktur data jurnal yang benar.');
                 }
             } catch (error) {
                 showNotification('Impor Gagal', 'Gagal membaca file. Pastikan file dalam format JSON yang benar.');
@@ -617,10 +609,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            if (editModal.style.display === 'flex') {
+                closeEditModal();
+            }
+            if (deleteConfirmModal.style.display === 'flex') {
+                closeDeleteConfirmModal();
+            }
+            if (notificationModal.style.display === 'flex') {
+                notificationModal.style.display = 'none';
+            }
+        }
+    });
+
     // --- PEMUATAN AWAL ---
     loadSettings();
     loadDraft();
-    updateDisplay();
+    refreshJournalView();
     updateCharCounter();
     backgroundMusic.volume = 0.3;
 });
