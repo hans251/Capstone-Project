@@ -857,7 +857,12 @@ pre[class*="language-"] {
     transform: rotate(15deg) scale(0.8);
   }
   .stats-container {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #chart-container {
+    width: 100%;
   }
 }
 
@@ -894,6 +899,15 @@ pre[class*="language-"] {
   .controls-container {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .stats-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #chart-container {
+    width: 100%;
   }
   #delete-all-btn {
     width: 100%;
