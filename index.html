@@ -21,13 +21,11 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- Container khusus untuk semua elemen latar belakang -->
     <div class="background-container">
       <div class="starfield-background"></div>
       <div class="blackhole-system"></div>
     </div>
 
-    <!-- Dekorasi Pojok -->
     <div class="top-right-decoration">
       <svg
         width="400"
@@ -70,11 +68,8 @@
     </div>
     <div class="bottom-left-decoration">E=mc²</div>
 
-    <!-- Konten utama sekarang menjadi elemen utama yang di-scroll -->
-    <!-- Footer di dalam main content -->
     <div class="music-control">
       <button id="music-toggle-btn" title="Play/Pause Music">
-        <!-- Ikon Play SVG -->
         <svg
           id="play-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +84,6 @@
         >
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
-        <!-- Ikon Pause SVG (disembunyikan) -->
         <svg
           id="pause-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -113,9 +107,9 @@
       <div>
         <p>Created with 🪐 by Hafiz Ansyari</p>
         <div class="footer-links">
-          <a href="#" target="_blank">GitHub</a>
-          <a href="#" target="_blank">LinkedIn</a>
-          <a href="#" target="_blank">Instagram</a>
+          <a href="https://github.com/hans251" target="_blank">GitHub</a>
+          <a href="www.linkedin.com/in/hafiz-ansyari-355a252a4" target="_blank">LinkedIn</a>
+          <a href="https://www.instagram.com/hansishere5/" target="_blank">Instagram</a>
         </div>
       </div>
     </footer>
@@ -123,7 +117,7 @@
     <main>
       <div class="main-header">
         <h1>My Physics Learning Journal</h1>
-        <button id="info-btn" title="Cara Penggunaan">
+        <button id="info-btn" title="How to Use">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -141,7 +135,7 @@
           </svg>
         </button>
       </div>
-      
+
       <form id="journal-form">
         <input type="text" id="title-input" placeholder="Entry Title..." />
         <textarea
@@ -159,7 +153,6 @@
         <button type="submit">Save Entry</button>
       </form>
 
-      <!-- PENAMBAHAN BARU: Container untuk kontrol (search & sort) -->
       <div class="controls-container">
         <input
           type="search"
@@ -193,11 +186,10 @@
       </div>
     </main>
 
-    <!-- Modal (tetap di luar main) -->
     <div id="edit-modal" class="modal-overlay">
       <div class="modal-content">
         <h2>Edit Entry</h2>
-        <input type="text" id="modal-title-input" placeholder="Judul..." />
+        <input type="text" id="modal-title-input" placeholder="Title..." />
         <textarea id="modal-textarea"></textarea>
         <div class="modal-actions">
           <button id="modal-save-btn">Save Changes</button>
@@ -232,40 +224,26 @@
 
     <div id="info-modal" class="modal-overlay">
       <div class="modal-content">
-        <h2>Cara Penggunaan</h2>
+        <h2>How to Use</h2>
         <p>
-          Selamat datang di Jurnal Belajar Fisika! Berikut adalah beberapa fitur
-          canggih yang bisa Anda gunakan:
+          Welcome to the Physics Learning Journal! Here are some features you can use:
         </p>
         <ul>
           <li>
-            <strong>Markdown:</strong> Anda bisa memformat teks. Gunakan
-            <code>**teks tebal**</code> untuk <strong>teks tebal</strong>,
-            <code>*teks miring*</code> untuk <em>teks miring</em>, dan
-            <code>* </code> di awal baris untuk membuat daftar.
+            <strong>Markdown:</strong> You can format text. Use <code>**bold text**</code> for <strong>bold text</strong>, <code>*italic text*</code> for <em>italic text</em>, and <code>* </code> at the beginning of a line to create a list.
           </li>
           <li>
-            <strong>Rumus LaTeX:</strong> Tulis rumus matematika yang indah.
-            Gunakan <code>$...$</code> untuk rumus di dalam baris (contoh:
-            $E=mc^2$) dan <code>$$...$$</code> untuk rumus di baris terpisah.
+            <strong>LaTeX Formula: Write beautiful mathematical formulas. Use <code>$...$</code> for inline formulas (example: $E=mc^2$) and <code>$$...$$</code> for displayed formulas.
           </li>
           <li>
-            <strong>Blok Kode:</strong> Tampilkan kode dengan rapi menggunakan
-            tiga backtick (<code>```javascript ... ```</code>).
+            <strong>Code Block:</strong> Display code neatly using three backticks (<code>```javascript ... ```</code>).
           </li>
           <li>
-            <strong>Tagging:</strong> Kategorikan entri Anda dengan tagar
-            seperti <code>#relativitas</code> di kolom tag. Klik tag di atas
-            daftar untuk memfilter.
-          </li>
-          <li>
-            <strong>Shortcut Simpan:</strong> Tekan
-            <code>Ctrl + Enter</code> saat mengetik di form untuk menyimpan
-            entri tanpa perlu mengklik tombol.
+            <strong>Tagging:</strong> Categorize your entries with hashtags like <code>#relativity</code> in the tag column. Click the tag above the list to filter.
           </li>
         </ul>
         <div class="modal-actions">
-          <button id="info-ok-btn">Mengerti</button>
+          <button id="info-ok-btn">Close</button>
         </div>
       </div>
     </div>
@@ -273,9 +251,8 @@
     <div id="toast-container"></div>
 
     <audio id="background-music" loop>
-      <!-- GANTI NAMA FILE INI DENGAN NAMA FILE MUSIK ANDA -->
       <source src="sound/stasis-finval.mp3" type="audio/mpeg" />
-      Browser Anda tidak mendukung elemen audio.
+      Your browser does not support the audio element.
     </audio>
 
     <input
