@@ -37,6 +37,7 @@ body {
   overflow: hidden;
   z-index: 0;
   perspective: 1000px;
+  z-index: -1;
 }
 
 .starfield-background {
@@ -575,6 +576,7 @@ button[type="submit"]:hover {
   padding-top: 20px;
   color: var(--text-muted);
   font-size: 0.9em;
+  z-index: 1;
 }
 
 .site-footer p {
