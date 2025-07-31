@@ -880,10 +880,14 @@ pre[class*="language-"] {
   h1 {
     font-size: 1.5em;
   }
-  textarea,
-  #search-input {
+  textarea {
     font-size: 14px;
     min-height: 100px;
+  }
+
+  #search-input {
+    font-size: 14px;
+    min-height: 44px;
   }
   button {
     font-size: 14px;
