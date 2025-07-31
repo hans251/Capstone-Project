@@ -121,8 +121,27 @@
     </footer>
 
     <main>
-      <h1>My Physics Learning Journal</h1>
-
+      <div class="main-header">
+        <h1>My Physics Learning Journal</h1>
+        <button id="info-btn" title="Cara Penggunaan">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </button>
+      </div>
+      
       <form id="journal-form">
         <input type="text" id="title-input" placeholder="Entry Title..." />
         <textarea
@@ -207,6 +226,46 @@
         <p id="notification-text">This is a notification message.</p>
         <div class="modal-actions">
           <button id="notification-ok-btn">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+      <div class="modal-content">
+        <h2>Cara Penggunaan</h2>
+        <p>
+          Selamat datang di Jurnal Belajar Fisika! Berikut adalah beberapa fitur
+          canggih yang bisa Anda gunakan:
+        </p>
+        <ul>
+          <li>
+            <strong>Markdown:</strong> Anda bisa memformat teks. Gunakan
+            <code>**teks tebal**</code> untuk <strong>teks tebal</strong>,
+            <code>*teks miring*</code> untuk <em>teks miring</em>, dan
+            <code>* </code> di awal baris untuk membuat daftar.
+          </li>
+          <li>
+            <strong>Rumus LaTeX:</strong> Tulis rumus matematika yang indah.
+            Gunakan <code>$...$</code> untuk rumus di dalam baris (contoh:
+            $E=mc^2$) dan <code>$$...$$</code> untuk rumus di baris terpisah.
+          </li>
+          <li>
+            <strong>Blok Kode:</strong> Tampilkan kode dengan rapi menggunakan
+            tiga backtick (<code>```javascript ... ```</code>).
+          </li>
+          <li>
+            <strong>Tagging:</strong> Kategorikan entri Anda dengan tagar
+            seperti <code>#relativitas</code> di kolom tag. Klik tag di atas
+            daftar untuk memfilter.
+          </li>
+          <li>
+            <strong>Shortcut Simpan:</strong> Tekan
+            <code>Ctrl + Enter</code> saat mengetik di form untuk menyimpan
+            entri tanpa perlu mengklik tombol.
+          </li>
+        </ul>
+        <div class="modal-actions">
+          <button id="info-ok-btn">Mengerti</button>
         </div>
       </div>
     </div>

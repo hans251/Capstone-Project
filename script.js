@@ -51,6 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const tagChartCanvas = document.getElementById('tag-chart');
     let myTagChart = null;
 
+    // Seleksi elemen untuk Modal Info
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const infoOkBtn = document.getElementById('info-ok-btn');
+
     // Variabel state aplikasi
     let currentEditingId = null;
     let currentDeletingId = null;
@@ -97,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // REFACTOR: Fungsi-fungsi pembantu untuk render
     function createEntryElement(entry, index, totalEntries, sortValue) {
         const entryContainer = document.createElement('div');
         entryContainer.className = 'entry';
@@ -293,19 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // REFACTOR: Nama fungsi diubah menjadi lebih deskriptif
-    /**
-     * Fungsi utama untuk memuat ulang seluruh tampilan jurnal.
-     * Mengambil data, memfilter, mengurutkan, lalu memanggil semua fungsi render.
-     * @param {number|null} newEntryId - ID entri baru untuk dianimasikan.
-     */
     function refreshJournalView(newEntryId = null) {
-        // 1. Ambil semua data
         let allEntries = getEntries();
         const searchTerm = searchInput.value.toLowerCase();
         const sortValue = sortSelect.value;
-        
-        // 2. Filter data berdasarkan tag dan pencarian
         if (activeTag) {
             allEntries = allEntries.filter(entry => entry.tags && entry.tags.includes(activeTag));
         }
@@ -313,15 +308,11 @@ document.addEventListener('DOMContentLoaded', () => {
             entry.text.toLowerCase().includes(searchTerm) || 
             (entry.title && entry.title.toLowerCase().includes(searchTerm))
         );
-
-        // 3. Urutkan data
         if (sortValue === 'newest') {
             filteredEntries.sort((a, b) => b.id - a.id);
         } else if (sortValue === 'oldest') {
             filteredEntries.sort((a, b) => a.id - b.id);
         }
-
-        // 4. Panggil semua fungsi render dengan data yang sudah diproses
         renderEntries(filteredEntries, newEntryId);
         renderTagCloud();
         renderTagChart();
@@ -405,7 +396,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCharCounter() {
         const currentLength = journalInput.value.length;
-        charCounter.textContent = `${currentLength}`;
+        const maxLength = journalInput.maxLength;
+        charCounter.textContent = `${currentLength} / ${maxLength}`;
     }
 
     function copyEntryToClipboard(text) {
@@ -470,6 +462,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function clearDraft() {
         localStorage.removeItem('journalDraft');
+    }
+
+    function isValidJournalData(data) {
+        if (!Array.isArray(data)) {
+            return false;
+        }
+        if (data.length === 0) {
+            return true;
+        }
+        const firstEntry = data[0];
+        return (
+            firstEntry.hasOwnProperty('id') &&
+            firstEntry.hasOwnProperty('title') &&
+            firstEntry.hasOwnProperty('text') &&
+            firstEntry.hasOwnProperty('timestamp')
+        );
     }
 
     // --- EVENT LISTENERS ---
@@ -609,6 +617,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    infoBtn.addEventListener('click', () => {
+        infoModal.style.display = 'flex';
+    });
+    infoOkBtn.addEventListener('click', () => {
+        infoModal.style.display = 'none';
+    });
+    infoModal.addEventListener('click', (event) => {
+        if (event.target === infoModal) {
+            infoModal.style.display = 'none';
+        }
+    });
+
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             if (editModal.style.display === 'flex') {
@@ -619,6 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (notificationModal.style.display === 'flex') {
                 notificationModal.style.display = 'none';
+            }
+            if (infoModal.style.display === 'flex') {
+                infoModal.style.display = 'none';
             }
         }
     });
