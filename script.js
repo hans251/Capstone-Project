@@ -1,4 +1,23 @@
+// Mengimpor koneksi (db, auth) dari file konfigurasi dan fungsi-fungsi Firebase yang dibutuhkan.
+import { db, auth } from "./firebase-config.js";
+import {
+  collection,
+  query,
+  onSnapshot,
+  addDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  writeBatch,
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import {
+  signInAnonymously,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Seleksi semua elemen DOM yang dibutuhkan
   const journalForm = document.getElementById("journal-form");
   const titleInput = document.getElementById("title-input");
   const journalInput = document.getElementById("journal-input");
@@ -37,28 +56,121 @@ document.addEventListener("DOMContentLoaded", () => {
   const infoBtn = document.getElementById("info-btn");
   const infoModal = document.getElementById("info-modal");
   const infoOkBtn = document.getElementById("info-ok-btn");
+
+  // Variabel untuk menyimpan state aplikasi
   let myTagChart = null;
   let currentEditingId = null;
   let currentDeletingId = null;
   let isDeletingAll = false;
   let activeTag = null;
+  let allEntries = []; // Sumber data utama, diisi oleh Firebase secara real-time
+  let currentUser = null; // Menyimpan info pengguna yang login
+  let entriesListener = null; // Menyimpan fungsi 'unsubscribe' dari listener Firebase
 
-  function getEntries() {
-    const entries = localStorage.getItem("journalEntries");
-    return entries ? JSON.parse(entries) : [];
+  // --- FUNGSI PENGELOLAAN DATA (FIREBASE) ---
+
+  async function addEntry(entryData) {
+    if (!currentUser) return;
+    try {
+      const collectionRef = collection(db, "users", currentUser.uid, "entries");
+      await addDoc(collectionRef, entryData);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      showNotification("Error", "Gagal menyimpan entri baru.");
+    }
   }
 
-  function saveEntries(entries) {
-    localStorage.setItem("journalEntries", JSON.stringify(entries));
+  async function updateEntry(id, updatedData) {
+    if (!currentUser) return;
+    try {
+      const docRef = doc(db, "users", currentUser.uid, "entries", id);
+      await updateDoc(docRef, updatedData);
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      showNotification("Error", "Gagal memperbarui entri.");
+    }
   }
 
+  async function deleteEntry(id) {
+    if (!currentUser) return;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.uid, "entries", id));
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+      showNotification("Error", "Gagal menghapus entri.");
+    }
+  }
+
+  async function deleteAllEntries() {
+    if (!currentUser) return;
+    const collectionRef = collection(db, "users", currentUser.uid, "entries");
+    const querySnapshot = await getDocs(collectionRef);
+    const batch = writeBatch(db);
+    querySnapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+  }
+
+  // --- FUNGSI AUTENTIKASI & LISTENER DATA ---
+  
+  function listenForEntries() {
+    if (entriesListener) entriesListener(); // Hentikan listener lama jika ada
+    if (!currentUser) {
+      allEntries = [];
+      refreshJournalView();
+      return;
+    }
+
+    const collectionRef = collection(db, "users", currentUser.uid, "entries");
+    const q = query(collectionRef);
+
+    entriesListener = onSnapshot(
+      q,
+      (querySnapshot) => {
+        allEntries = [];
+        querySnapshot.forEach((doc) => {
+          allEntries.push({ id: doc.id, ...doc.data() });
+        });
+        refreshJournalView();
+      },
+      (error) => {
+        console.error("Error listening for entries: ", error);
+        showNotification("Error", "Tidak dapat mengambil data jurnal.");
+      }
+    );
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      listenForEntries();
+    } else {
+      currentUser = null;
+      listenForEntries();
+    }
+  });
+
+  async function anonymousLogin() {
+    try {
+      await signInAnonymously(auth);
+    } catch (error) {
+      console.error("Anonymous sign in failed:", error);
+      showNotification(
+        "Koneksi Gagal",
+        "Tidak dapat terhubung ke server. Periksa koneksi dan pengaturan Firebase Anda."
+      );
+    }
+  }
+
+  // --- FUNGSI RENDER ---
   function renderEntries(entriesToRender, newEntryId = null) {
     entryCounter.textContent = `${entriesToRender.length} Entries Found`;
     entryList.innerHTML = "";
 
     if (entriesToRender.length === 0) {
       entryList.innerHTML =
-        '<p style="text-align: center; color: #888;">No entries found. Try a different search or add a new entry!</p>';
+        '<p style="text-align: center; color: #888;">Tidak ada entri. Coba buat entri baru!</p>';
       return;
     }
 
@@ -78,13 +190,17 @@ document.addEventListener("DOMContentLoaded", () => {
       entryList.appendChild(entryElement);
     });
 
-    Prism.highlightAll();
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-      ],
-    });
+    setTimeout(() => {
+      if (typeof Prism !== "undefined") Prism.highlightAll();
+      if (typeof renderMathInElement !== "undefined") {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false },
+          ],
+        });
+      }
+    }, 0);
   }
 
   function createEntryElement(entry, index, totalEntries, sortValue) {
@@ -116,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const textElement = document.createElement("div");
     textElement.className = "entry-text";
-    const rawHtml = marked.parse(entry.text);
+    const rawHtml = typeof marked !== 'undefined' ? marked.parse(entry.text) : entry.text;
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = rawHtml;
     const links = tempDiv.querySelectorAll("a");
@@ -134,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
     contentWrapper.appendChild(textElement);
     contentWrapper.appendChild(tagsContainer);
 
-    const TRUNCATE_LENGTH = 50;
+    const TRUNCATE_LENGTH = 300;
     if (entry.text.length > TRUNCATE_LENGTH) {
       textElement.classList.add("truncated");
       const readMoreBtn = document.createElement("button");
@@ -197,7 +313,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTagCloud() {
-    const allEntries = getEntries();
     const allTags = allEntries.flatMap((entry) => entry.tags || []);
     const uniqueTags = [...new Set(allTags)];
     tagCloudContainer.innerHTML = "";
@@ -230,7 +345,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTagChart() {
-    const allEntries = getEntries();
     const allTags = allEntries.flatMap((entry) => entry.tags || []);
 
     if (allTags.length === 0) {
@@ -292,33 +406,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function refreshJournalView(newEntryId = null) {
-    let allEntries = getEntries();
+    let entriesToDisplay = [...allEntries];
     const searchTerm = searchInput.value.toLowerCase();
     const sortValue = sortSelect.value;
     if (activeTag) {
-      allEntries = allEntries.filter(
+      entriesToDisplay = entriesToDisplay.filter(
         (entry) => entry.tags && entry.tags.includes(activeTag)
       );
     }
-    const filteredEntries = allEntries.filter(
-      (entry) =>
-        entry.text.toLowerCase().includes(searchTerm) ||
-        (entry.title && entry.title.toLowerCase().includes(searchTerm))
-    );
-    if (sortValue === "newest") {
-      filteredEntries.sort((a, b) => b.id - a.id);
-    } else if (sortValue === "oldest") {
-      filteredEntries.sort((a, b) => a.id - b.id);
+    if (searchTerm) {
+      entriesToDisplay = entriesToDisplay.filter(
+        (entry) =>
+          entry.text.toLowerCase().includes(searchTerm) ||
+          (entry.title && entry.title.toLowerCase().includes(searchTerm))
+      );
     }
-    renderEntries(filteredEntries, newEntryId);
+    if (sortValue === "newest") {
+      entriesToDisplay.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    } else {
+      entriesToDisplay.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    }
+    renderEntries(entriesToDisplay, newEntryId);
     renderTagCloud();
     renderTagChart();
   }
 
   // --- MODAL FUNCTIONS ---
   function openEditModal(id) {
-    const entries = getEntries();
-    const entryToEdit = entries.find((e) => e.id === id);
+    const entryToEdit = allEntries.find((e) => e.id === id);
     if (!entryToEdit) return;
     currentEditingId = id;
     modalTitleInput.value = entryToEdit.title || "";
@@ -331,17 +446,12 @@ document.addEventListener("DOMContentLoaded", () => {
     editModal.style.display = "none";
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (currentEditingId === null) return;
-    const entries = getEntries();
-    const entryToEdit = entries.find((e) => e.id === currentEditingId);
     const newTitle = modalTitleInput.value.trim();
     const newText = modalTextarea.value.trim();
-    if (entryToEdit && newTitle && newText) {
-      entryToEdit.title = newTitle;
-      entryToEdit.text = newText;
-      saveEntries(entries);
-      refreshJournalView();
+    if (newTitle && newText) {
+      await updateEntry(currentEditingId, { title: newTitle, text: newText });
     }
     closeEditModal();
   }
@@ -367,32 +477,13 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteConfirmModal.style.display = "none";
   }
 
-  function confirmDelete() {
-    if (isDeletingAll) {
-      const allEntryElements = document.querySelectorAll(".entry");
-      allEntryElements.forEach((el) => el.classList.add("removing"));
-      setTimeout(() => {
-        saveEntries([]);
-        refreshJournalView();
-        isDeletingAll = false;
-      }, 300);
-    } else if (currentDeletingId !== null) {
-      const entryElement = document.querySelector(
-        `.entry[data-id="${currentDeletingId}"]`
-      );
-      if (entryElement) {
-        entryElement.classList.add("removing");
-        const idToDelete = currentDeletingId;
-        setTimeout(() => {
-          let entries = getEntries();
-          entries = entries.filter((e) => e.id !== idToDelete);
-          saveEntries(entries);
-          currentDeletingId = null;
-          refreshJournalView();
-        }, 300);
-      }
-    }
+  async function confirmDelete() {
     closeDeleteConfirmModal();
+    if (isDeletingAll) {
+      await deleteAllEntries();
+    } else if (currentDeletingId) {
+      await deleteEntry(currentDeletingId);
+    }
   }
 
   function updateCharCounter() {
@@ -473,14 +564,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const firstEntry = data[0];
     return (
-      firstEntry.hasOwnProperty("id") &&
       firstEntry.hasOwnProperty("title") &&
       firstEntry.hasOwnProperty("text") &&
       firstEntry.hasOwnProperty("timestamp")
     );
   }
 
-  journalForm.addEventListener("submit", function (event) {
+  journalForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     const title = titleInput.value.trim();
     const text = journalInput.value.trim();
@@ -491,22 +581,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (title && text) {
       const newEntry = {
-        id: Date.now(),
         title: title,
         text: text,
         timestamp: new Date().toISOString(),
         tags: tags,
       };
-      const currentEntries = getEntries();
-      currentEntries.push(newEntry);
-      saveEntries(currentEntries);
+      await addEntry(newEntry);
 
       titleInput.value = "";
       journalInput.value = "";
       tagInput.value = "";
       clearDraft();
       updateCharCounter();
-      refreshJournalView(newEntry.id);
     }
   });
 
@@ -521,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   deleteAllBtn.addEventListener("click", () => {
-    if (getEntries().length > 0) {
+    if (allEntries.length > 0) {
       openDeleteConfirmModal(null);
     }
   });
@@ -547,12 +633,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   exportBtn.addEventListener("click", () => {
-    const entries = getEntries();
-    if (entries.length === 0) {
+    if (allEntries.length === 0) {
       showNotification("Export Failed", "No data to export.");
       return;
     }
-    const dataStr = JSON.stringify(entries, null, 2);
+    const dataStr = JSON.stringify(allEntries, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -575,22 +660,25 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const importedEntries = JSON.parse(e.target.result);
         if (isValidJournalData(importedEntries)) {
-          isDeletingAll = true;
-          deleteModalTitle.textContent = "Import Confirmation";
-          deleteModalText.textContent =
-            "This will overwrite all existing entries. Continue?";
-          deleteConfirmModal.style.display = "flex";
+            openDeleteConfirmModal(null); // Buka modal konfirmasi untuk menimpa
+            
+            const importConfirmHandler = async () => {
+                await deleteAllEntries(); // Hapus semua data lama
+                const batch = writeBatch(db);
+                importedEntries.forEach(entry => {
+                    delete entry.id; 
+                    const docRef = doc(collection(db, 'users', currentUser.uid, 'entries'));
+                    batch.set(docRef, entry);
+                });
+                await batch.commit(); // Tambahkan semua data baru
+                
+                closeDeleteConfirmModal();
+                deleteConfirmBtn.removeEventListener("click", importConfirmHandler);
+                deleteConfirmBtn.addEventListener("click", confirmDelete);
+            };
 
-          const importConfirmHandler = () => {
-            saveEntries(importedEntries);
-            refreshJournalView();
-            closeDeleteConfirmModal();
-            deleteConfirmBtn.removeEventListener("click", importConfirmHandler);
-            deleteConfirmBtn.addEventListener("click", confirmDelete);
-          };
-
-          deleteConfirmBtn.removeEventListener("click", confirmDelete);
-          deleteConfirmBtn.addEventListener("click", importConfirmHandler);
+            deleteConfirmBtn.removeEventListener("click", confirmDelete);
+            deleteConfirmBtn.addEventListener("click", importConfirmHandler);
         } else {
           showNotification(
             "Import Failed",
@@ -657,9 +745,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // --- PEMUATAN AWAL ---
   loadSettings();
   loadDraft();
-  refreshJournalView();
+  entryList.innerHTML = '<p style="text-align: center; color: #888;">Connecting to the server...</p>';
+  anonymousLogin();
   updateCharCounter();
   backgroundMusic.volume = 0.3;
+
+  // --- PWA Service Worker Registration ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, err => {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
 });

@@ -18,6 +18,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
     />
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -69,7 +70,7 @@
     <div class="bottom-left-decoration">E=mc²</div>
 
     <div class="music-control">
-      <button id="music-toggle-btn" title="Play/Pause Music">
+      <button id="music-toggle-btn" title="Play/Pause Music" aria-label="Toggle background music">
         <svg
           id="play-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -117,7 +118,7 @@
     <main>
       <div class="main-header">
         <h1>Physics Learning Journal</h1>
-        <button id="info-btn" title="How to Use">
+        <button id="info-btn" title="How to Use" aria-label="Show usage instructions">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -158,8 +159,9 @@
           type="search"
           id="search-input"
           placeholder="Search entries..."
+          aria-label="Search journal entries"
         />
-        <select id="sort-select">
+        <select id="sort-select" aria-label="Sort entries">
           <option value="newest">Sort: Newest</option>
           <option value="oldest">Sort: Oldest</option>
         </select>
@@ -268,7 +270,9 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MODIFIKASI KUNCI: Memuat file konfigurasi Firebase sebagai module -->
+    <script type="module" src="firebase-config.js"></script>
+    <!-- MODIFIKASI KUNCI: Mengubah script utama menjadi module -->
     <script type="module" src="script.js"></script>
-    <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
   </body>
 </html>
