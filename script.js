@@ -18,6 +18,7 @@ import {
 
 document.addEventListener("DOMContentLoaded", () => {
   // Seleksi semua elemen DOM yang dibutuhkan
+  const loadingOverlay = document.getElementById("loading-overlay");
   const journalForm = document.getElementById("journal-form");
   const titleInput = document.getElementById("title-input");
   const journalInput = document.getElementById("journal-input");
@@ -145,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) {
       currentUser = user;
       listenForEntries();
+      hideLoadingOverlay();
     } else {
       currentUser = null;
       listenForEntries();
@@ -162,6 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
   }
+
+  function hideLoadingOverlay() {
+    loadingOverlay.classList.add('hidden');
+  }
+
 
   // --- FUNGSI RENDER ---
   function renderEntries(entriesToRender, newEntryId = null) {
@@ -290,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const copyButton = document.createElement("button");
     copyButton.textContent = "Copy";
     copyButton.className = "copy-btn";
+    copyButton.setAttribute('aria-label', `Copy content of entry titled ${entry.title}`);
     copyButton.addEventListener("click", () =>
       copyEntryToClipboard(entry.text)
     );
@@ -297,11 +305,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const editButton = document.createElement("button");
     editButton.textContent = "Edit";
     editButton.className = "edit-btn";
+    editButton.setAttribute('aria-label', `Edit entry titled ${entry.title}`);
     editButton.addEventListener("click", () => openEditModal(entry.id));
 
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-btn";
+    deleteButton.setAttribute('aria-label', `Delete entry titled ${entry.title}`);
     deleteButton.addEventListener("click", () =>
       openDeleteConfirmModal(entry.id)
     );
