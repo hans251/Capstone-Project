@@ -458,12 +458,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function saveEdit() {
     if (currentEditingId === null) return;
-    const newTitle = modalTitleInput.value.trim();
-    const newText = modalTextarea.value.trim();
-    if (newTitle && newText) {
-      await updateEntry(currentEditingId, { title: newTitle, text: newText });
+    modalSaveBtn.disabled = true;
+    modalSaveBtn.textContent = 'Menyimpan...';
+
+    try {
+        const newTitle = modalTitleInput.value.trim();
+        const newText = modalTextarea.value.trim();
+        if (newTitle && newText) {
+            await updateEntry(currentEditingId, { title: newTitle, text: newText });
+        }
+    } finally {
+        modalSaveBtn.disabled = false;
+        modalSaveBtn.textContent = 'Save Changes';
+        closeEditModal();
     }
-    closeEditModal();
   }
 
   function openDeleteConfirmModal(id) {
@@ -582,27 +590,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   journalForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    const title = titleInput.value.trim();
-    const text = journalInput.value.trim();
-    const tags = tagInput.value
-      .trim()
-      .split(/[\s,]+/)
-      .filter((tag) => tag.startsWith("#") && tag.length > 1);
+    const submitButton = journalForm.querySelector('button[type="submit"]');
+    
+    // MODIFIKASI: Menambahkan feedback pada tombol simpan utama
+    submitButton.disabled = true;
+    submitButton.textContent = 'Menyimpan...';
 
-    if (title && text) {
-      const newEntry = {
-        title: title,
-        text: text,
-        timestamp: new Date().toISOString(),
-        tags: tags,
-      };
-      await addEntry(newEntry);
+    try {
+        const title = titleInput.value.trim();
+        const text = journalInput.value.trim();
+        const tags = tagInput.value
+        .trim()
+        .split(/[\s,]+/)
+        .filter((tag) => tag.startsWith("#") && tag.length > 1);
 
-      titleInput.value = "";
-      journalInput.value = "";
-      tagInput.value = "";
-      clearDraft();
-      updateCharCounter();
+        if (title && text) {
+        const newEntry = {
+            title: title,
+            text: text,
+            timestamp: new Date().toISOString(),
+            tags: tags,
+        };
+        await addEntry(newEntry);
+
+        titleInput.value = "";
+        journalInput.value = "";
+        tagInput.value = "";
+        clearDraft();
+        updateCharCounter();
+        }
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Save Entry';
     }
   });
 

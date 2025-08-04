@@ -376,6 +376,12 @@ button[type="submit"]:hover {
   background-color: var(--primary-hover-color);
 }
 
+button[type="submit"]:disabled {
+    background-color: var(--text-muted);
+    cursor: not-allowed;
+}
+  
+
 .list-header {
   display: flex;
   justify-content: space-between;
