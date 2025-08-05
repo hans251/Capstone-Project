@@ -17,7 +17,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Seleksi semua elemen DOM yang dibutuhkan
   const loadingOverlay = document.getElementById("loading-overlay");
   const journalForm = document.getElementById("journal-form");
   const titleInput = document.getElementById("title-input");
@@ -792,7 +791,7 @@ document.addEventListener("DOMContentLoaded", () => {
   entryList.innerHTML = '<p style="text-align: center; color: #888;">Connecting to the server...</p>';
   anonymousLogin();
   updateCharCounter();
-  backgroundMusic.volume = 0.3;
+  backgroundMusic.volume = 0.5;
 
   // --- PWA Service Worker Registration ---
   if ('serviceWorker' in navigator) {
