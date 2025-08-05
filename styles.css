@@ -238,12 +238,13 @@ main {
 }
 
 h1 {
-  text-align: center;
-  color: #ffffff;
+    text-align: center;
+    color: #ffffff;
 }
 .search-container {
   margin-bottom: 20px;
 }
+
 #search-input,
 #title-input {
   width: 100%;
@@ -617,6 +618,7 @@ button[type="submit"]:disabled {
 .site-footer {
   text-align: center;
   margin-top: 40px;
+  margin-bottom: 40px;
   padding-top: 20px;
   color: var(--text-muted);
   font-size: 0.9em;
@@ -829,37 +831,6 @@ pre[class*="language-"] {
     font-size: 1.1em;
     color: var(--text-muted);
     line-height: 1.6;
-}
-
-.logo-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.logo-image {
-    width: 80px; /* Anda bisa sesuaikan ukurannya */
-    height: auto;
-    transition: transform 0.5s ease-in-out;
-}
-
-.logo-image:hover {
-    transform: rotate(15deg) scale(1.1); /* Efek hover yang lebih halus */
-}
-
-.main-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    position: relative;
-    margin-bottom: 2rem;
-}
-
-h1 {
-    text-align: center;
-    color: #ffffff;
-    margin: 0;
 }
 
 /* KEYFRAMES */
