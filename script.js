@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const emptyStateText = document.createElement('p');
         emptyStateText.className = 'empty-state-text';
-        emptyStateText.textContent = 'Belum ada catatan. Mulailah petualangan ilmiahmu dengan menulis entri pertamamu!';
+        emptyStateText.textContent = 'No records yet. Start writing your first entry!';
 
         emptyStateContainer.appendChild(emptyStateIcon);
         emptyStateContainer.appendChild(emptyStateText);
