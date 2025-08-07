@@ -1,7 +1,5 @@
-// Nama cache unik untuk versi aplikasi Anda
 const CACHE_NAME = 'physics-journal-v1';
 
-// Daftar semua file yang perlu disimpan untuk bekerja secara offline
 const urlsToCache = [
   '/',
   'index.html',
@@ -27,30 +25,23 @@ const urlsToCache = [
   'https://placehold.co/512x512/0d1117/d4af37?text=PJ'
 ];
 
-// Event 'install': Dipanggil saat service worker pertama kali diinstal
 self.addEventListener('install', event => {
-  // Menunggu hingga proses caching selesai
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Opened cache');
-        // Menambahkan semua file penting ke dalam cache
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Event 'fetch': Dipanggil setiap kali aplikasi meminta sebuah file (gambar, css, js, dll.)
 self.addEventListener('fetch', event => {
   event.respondWith(
-    // Cek apakah permintaan ini sudah ada di dalam cache
     caches.match(event.request)
       .then(response => {
-        // Jika ada di cache, langsung kembalikan dari cache
         if (response) {
           return response;
         }
-        // Jika tidak ada, coba ambil dari internet
         return fetch(event.request);
       }
     )

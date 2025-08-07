@@ -1,4 +1,3 @@
-// Mengimpor koneksi (db, auth) dari file konfigurasi dan fungsi-fungsi Firebase yang dibutuhkan.
 import { db, auth } from "./firebase-config.js";
 import {
   collection,
@@ -56,18 +55,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const infoBtn = document.getElementById("info-btn");
   const infoModal = document.getElementById("info-modal");
   const infoOkBtn = document.getElementById("info-ok-btn");
-
-  // Variabel untuk menyimpan state aplikasi
   let myTagChart = null;
   let currentEditingId = null;
   let currentDeletingId = null;
   let isDeletingAll = false;
   let activeTag = null;
-  let allEntries = []; // Sumber data utama, diisi oleh Firebase secara real-time
-  let currentUser = null; // Menyimpan info pengguna yang login
-  let entriesListener = null; // Menyimpan fungsi 'unsubscribe' dari listener Firebase
+  let allEntries = [];
+  let currentUser = null;
+  let entriesListener = null;
 
-  // --- FUNGSI PENGELOLAAN DATA (FIREBASE) ---
+  // --- DATA MANAGEMENT (FIREBASE) ---
 
   async function addEntry(entryData) {
     if (!currentUser) return;
@@ -112,10 +109,10 @@ document.addEventListener("DOMContentLoaded", () => {
     await batch.commit();
   }
 
-  // --- FUNGSI AUTENTIKASI & LISTENER DATA ---
+  // --- AUTENTIKASI & DATA LISTENER ---
   
   function listenForEntries() {
-    if (entriesListener) entriesListener(); // Hentikan listener lama jika ada
+    if (entriesListener) entriesListener();
     if (!currentUser) {
       allEntries = [];
       refreshJournalView();
@@ -169,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // --- FUNGSI RENDER ---
+  // --- RENDERING ---
   function renderEntries(entriesToRender, newEntryId = null) {
     entryCounter.textContent = `${entriesToRender.length} Entries Found`;
     entryList.innerHTML = "";
@@ -452,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTagChart();
   }
 
-  // --- MODAL FUNCTIONS ---
+  // --- RENDERING MODAL ---
   function openEditModal(id) {
     const entryToEdit = allEntries.find((e) => e.id === id);
     if (!entryToEdit) return;
@@ -602,8 +599,6 @@ document.addEventListener("DOMContentLoaded", () => {
   journalForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     const submitButton = journalForm.querySelector('button[type="submit"]');
-    
-    // MODIFIKASI: Menambahkan feedback pada tombol simpan utama
     submitButton.disabled = true;
     submitButton.textContent = 'Menyimpan...';
 
@@ -682,7 +677,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "physics-journal-backup.json";
+    link.download = "scholar-notes-backup.json";
     link.click();
     URL.revokeObjectURL(url);
   });
@@ -700,17 +695,16 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const importedEntries = JSON.parse(e.target.result);
         if (isValidJournalData(importedEntries)) {
-            openDeleteConfirmModal(null); // Buka modal konfirmasi untuk menimpa
-            
+            openDeleteConfirmModal(null);
             const importConfirmHandler = async () => {
-                await deleteAllEntries(); // Hapus semua data lama
+                await deleteAllEntries();
                 const batch = writeBatch(db);
                 importedEntries.forEach(entry => {
                     delete entry.id; 
                     const docRef = doc(collection(db, 'users', currentUser.uid, 'entries'));
                     batch.set(docRef, entry);
                 });
-                await batch.commit(); // Tambahkan semua data baru
+                await batch.commit();
                 
                 closeDeleteConfirmModal();
                 deleteConfirmBtn.removeEventListener("click", importConfirmHandler);
@@ -785,7 +779,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- PEMUATAN AWAL ---
   loadSettings();
   loadDraft();
   entryList.innerHTML = '<p style="text-align: center; color: #888;">Connecting to the server...</p>';

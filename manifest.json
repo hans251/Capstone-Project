@@ -1,11 +1,11 @@
 {
-  "name": "Physics Learning Journal",
-  "short_name": "Physics Journal",
+  "name": "The Scholar Notes",
+  "short_name": "Scholar Notes",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0d1117",
   "theme_color": "#d4af37",
-  "description": "A web application for physics enthusiasts.",
+  "description": "A web application for managing your study notes.",
   "icons": [
     {
       "src": "https://placehold.co/192x192/0d1117/d4af37?text=PJ",
