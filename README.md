@@ -4,7 +4,7 @@
 
 Unlike generic note-taking apps, this journal is built from the ground up with features specifically tailored for technical and scientific documentation, such as support for **Markdown, LaTeX mathematical equations**, and **code syntax highlighting**. All data is saved persistently in the browser's ```localStorage```, making it a fast and reliable client-side application.
 
-[Link to Live Demo Here]
+https://physics-journal.netlify.app/
 
 **Features**
 This project goes beyond the basic CRUD requirements, incorporating a wide range of modern and professional features:
