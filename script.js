@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const editModal = document.getElementById("edit-modal");
   const modalTitleInput = document.getElementById("modal-title-input");
   const modalTextarea = document.getElementById("modal-textarea");
+  const modalTagInput = document.getElementById("modal-tag-input");
   const modalSaveBtn = document.getElementById("modal-save-btn");
   const modalCancelBtn = document.getElementById("modal-cancel-btn");
   const deleteConfirmModal = document.getElementById("delete-confirm-modal");
@@ -456,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentEditingId = id;
     modalTitleInput.value = entryToEdit.title || "";
     modalTextarea.value = entryToEdit.text;
+    modalTagInput.value = (entryToEdit.tags || []).join(' ');
     editModal.style.display = "flex";
   }
 
@@ -472,8 +474,16 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
         const newTitle = modalTitleInput.value.trim();
         const newText = modalTextarea.value.trim();
+        const newTags = modalTagInput.value
+          .trim()
+          .split(/[\s,]+/)
+          .filter((tag) => tag.startsWith("#") && tag.length > 1);
         if (newTitle && newText) {
-            await updateEntry(currentEditingId, { title: newTitle, text: newText });
+            await updateEntry(currentEditingId, { 
+              title: newTitle,
+              text: newText,
+              tags: newTags
+            });
         }
     } finally {
         modalSaveBtn.disabled = false;
