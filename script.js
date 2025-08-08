@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let entriesListener = null;
 
   // --- DATA MANAGEMENT (FIREBASE) ---
-
   async function addEntry(entryData) {
     if (!currentUser) return;
     try {
@@ -74,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await addDoc(collectionRef, entryData);
     } catch (error) {
       console.error("Error adding document: ", error);
-      showNotification("Error", "Gagal menyimpan entri baru.");
+      showNotification("Error", "Failed to save new entry.");
     }
   }
 
@@ -85,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await updateDoc(docRef, updatedData);
     } catch (error) {
       console.error("Error updating document: ", error);
-      showNotification("Error", "Gagal memperbarui entri.");
+      showNotification("Error", "Failed to update entry.");
     }
   }
 
@@ -95,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await deleteDoc(doc(db, "users", currentUser.uid, "entries", id));
     } catch (error) {
       console.error("Error deleting document: ", error);
-      showNotification("Error", "Gagal menghapus entri.");
+      showNotification("Error", "Failed to delete the entry.");
     }
   }
 
@@ -134,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       (error) => {
         console.error("Error listening for entries: ", error);
-        showNotification("Error", "Tidak dapat mengambil data jurnal.");
+        showNotification("Error", "Cannot retrieve journal data.");
       }
     );
   }
@@ -156,8 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Anonymous sign in failed:", error);
       showNotification(
-        "Koneksi Gagal",
-        "Tidak dapat terhubung ke server. Periksa koneksi dan pengaturan Firebase Anda."
+        "Connection Failed",
+        "Cannot connect to the server. Check your connection and Firebase settings.."
       );
     }
   }
@@ -469,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function saveEdit() {
     if (currentEditingId === null) return;
     modalSaveBtn.disabled = true;
-    modalSaveBtn.textContent = 'Menyimpan...';
+    modalSaveBtn.textContent = 'Saving...';
 
     try {
         const newTitle = modalTitleInput.value.trim();
@@ -504,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentDeletingId = null;
       deleteModalTitle.textContent = "Delete All Entries";
       deleteModalText.textContent =
-        "Are you sure you want to delete ALL entries? This is irreversible.";
+        "Are you sure you want to delete All entries? This is irreversible.";
     }
     deleteConfirmModal.style.display = "flex";
   }
@@ -610,7 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     const submitButton = journalForm.querySelector('button[type="submit"]');
     submitButton.disabled = true;
-    submitButton.textContent = 'Menyimpan...';
+    submitButton.textContent = 'Saving...';
 
     try {
         const title = titleInput.value.trim();
